@@ -29,9 +29,11 @@ Run the app:
 
         python main.py
 
-The app gets the input from two CSV files, where one (x.csv) contains the input, and the other (Y.csv) the expected output.
+The app gets the input from two CSV files, where one (x.csv) contains the input, and the other (y.csv) the expected output.
 The first column of each CSV is treated as identity column.
 Only rows where the identity exists in both CSV files are included.
+Validation data is read in the same format from x_valid.csv and y_valid.csv.
+For examples, see the [demo data](data).
 
 
 Development
