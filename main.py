@@ -1,5 +1,6 @@
 import argparse
 import os
+from collections import namedtuple
 from math import fabs
 
 import pandas as pd
@@ -8,6 +9,8 @@ import torch.utils.data as utils_data
 from torch import nn, optim
 
 from fc_model import Network
+
+TrainOptions = namedtuple('TrainOptions', ['num_epochs', 'print_every', 'use_gpu'])
 
 
 def main():
@@ -19,28 +22,34 @@ def main():
     x = pd.read_csv(os.path.join(base_dir, args.x))
     data_loader = get_dataloader(x, y)
 
+    x_valid = pd.read_csv(os.path.join(base_dir, args.xvalid))
+    y_valid = pd.read_csv(os.path.join(base_dir, args.yvalid))
+    data_loader_valid = get_dataloader(x_valid, y_valid, 1)
+
+    train_options = TrainOptions(args.epochs, args.print_every, args.gpu)
+
     num_features_in = x.shape[1] - 1
     num_features_out = y.shape[1] - 1
-    nw = Network(num_features_in, num_features_out, [4, 8], 0)  # TODO: get layers from input
 
+    # TODO: get layers from input
+    run(data_loader, data_loader_valid, num_features_in, num_features_out, [4, 8], train_options)
+
+
+def run(data_loader, data_loader_valid, num_features_in, num_features_out, hidden_layers, train_options):
+    device = get_device(train_options.use_gpu)
+    nw = Network(num_features_in, num_features_out, hidden_layers, 0)
     criterion = nn.MSELoss()
     # criterion = nn.CrossEntropyLoss()
     # optimizer = optim.Adam(nw.parameters(), lr=0.001)
     optimizer = optim.SGD(nw.parameters(), lr=0.001, momentum=0.4)
-
-    device = get_device(args)
     nw = nw.to(device)
-
-    train(args, criterion, data_loader, device, nw, optimizer)
-    # TODO: save
-
-    validate(args, base_dir, device, nw, x, y)
+    train(train_options, criterion, data_loader, device, nw, optimizer)
+    loss = validate(data_loader_valid, device, nw)
+    return loss
 
 
-def validate(args, base_dir, device, nw, x, y):
-    x_valid = pd.read_csv(os.path.join(base_dir, args.xvalid))
-    y_valid = pd.read_csv(os.path.join(base_dir, args.yvalid))
-    data_loader = get_dataloader(x_valid, y_valid, 1)
+def validate(data_loader, device, nw):
+
     print("Validating...")
     loss = 0
     for batch_idx, (data, target) in enumerate(data_loader):
@@ -49,10 +58,11 @@ def validate(args, base_dir, device, nw, x, y):
         loss += current_loss
         print(f"input: {data.item()}, expected: {target.item()}, actual: {actual.item()}, loss: {current_loss}")
     print(f"total loss: {loss}")
+    return loss
 
 
-def get_device(args):
-    return torch.device("cuda:0" if args.gpu and torch.cuda.is_available() else "cpu")
+def get_device(gpu):
+    return torch.device("cuda:0" if gpu and torch.cuda.is_available() else "cpu")
 
 
 def predict(device, nw, data):
@@ -63,9 +73,9 @@ def predict(device, nw, data):
     return output
 
 
-def train(args, criterion, data_loader, device, nw, optimizer):
+def train(options, criterion, data_loader, device, nw, optimizer):
     nw.train()
-    for epoch in range(args.epochs):
+    for epoch in range(options.num_epochs):
         running_loss = 0.0
         for batch_idx, (data, target) in enumerate(data_loader):
             data = data.to(device)
@@ -76,24 +86,22 @@ def train(args, criterion, data_loader, device, nw, optimizer):
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            if batch_idx % args.print_every == 0:
-                print("Epoch: {}/{}.. ".format(epoch + 1, args.epochs),
+            if batch_idx % options.print_every == 0:
+                print("Epoch: {}/{}.. ".format(epoch + 1, options.num_epochs),
                       "Progress~: {:.2f}.. ".format(
                           ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100),
-                      "Training Loss: {:.3f}.. ".format(running_loss / args.print_every))
+                      "Training Loss: {:.3f}.. ".format(running_loss / options.print_every))
                 running_loss = 0.0
 
 
-def get_dataloader(x, y, batch_size = None):
+def get_dataloader(x, y, batch_size=None):
     # noinspection PyUnusedLocal
     common_keys = pd.Index(x.iloc[:, 0]).intersection(pd.Index(y.iloc[:, 0]))
     x_id_col_name = x.axes[1][0]
     x = x.query(f"{x_id_col_name} in @common_keys").iloc[:, 1:].values
-    # noinspection PyCallingNonCallable
     x = torch.FloatTensor(x)
     y_id_col_name = y.axes[1][0]
     y = y.query(f"{y_id_col_name} in @common_keys").iloc[:, 1:].values
-    # noinspection PyCallingNonCallable
     y = torch.FloatTensor(y)
     training_samples = utils_data.TensorDataset(x, y)
     batch_size = batch_size if batch_size is not None else len(x)
@@ -116,4 +124,5 @@ def get_parser():
     return parser
 
 
-main()
+if __name__ == "__main__":
+    main()
