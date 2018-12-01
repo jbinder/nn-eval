@@ -11,45 +11,42 @@ from torch import nn, optim
 from fc_model import Network
 
 TrainOptions = namedtuple('TrainOptions', ['num_epochs', 'print_every', 'use_gpu'])
+NetworkOptions = namedtuple('NetworkOptions', ['input_layer_size', 'output_layer_size', 'hidden_layer_sizes'])
 
 
 def main():
     args = get_parser().parse_args()
 
-    base_dir = os.getcwd()
-
-    y = pd.read_csv(os.path.join(base_dir, args.y))
-    x = pd.read_csv(os.path.join(base_dir, args.x))
-    data_loader = get_dataloader(x, y)
-
-    x_valid = pd.read_csv(os.path.join(base_dir, args.xvalid))
-    y_valid = pd.read_csv(os.path.join(base_dir, args.yvalid))
-    data_loader_valid = get_dataloader(x_valid, y_valid, 1)
+    data_loader = {'train': get_data_loader_from_file_name(args.x, args.y),
+                   'valid': get_data_loader_from_file_name(args.xvalid, args.yvalid, 1)}
 
     train_options = TrainOptions(args.epochs, args.print_every, args.gpu)
 
-    num_features_in = x.shape[1] - 1
-    num_features_out = y.shape[1] - 1
+    num_features_in = data_loader['train'].dataset.tensors[0].shape[1]
+    num_features_out = data_loader['train'].dataset.tensors[1].shape[1]
+    network_options = NetworkOptions(num_features_in, num_features_out, args.size_hidden)
 
-    # TODO: get layers from input
-    run(data_loader, data_loader_valid, num_features_in, num_features_out, [4, 8], train_options)
+    run(data_loader, network_options, train_options)
 
 
-def run(data_loader, data_loader_valid, num_features_in, num_features_out, hidden_layers, train_options):
+def run(data_loader, network_options, train_options):
     device = get_device(train_options.use_gpu)
-    nw = Network(num_features_in, num_features_out, hidden_layers, 0)
+    nw = Network(
+        network_options.input_layer_size,
+        network_options.output_layer_size,
+        network_options.hidden_layer_sizes,
+        0)
     criterion = nn.MSELoss()
     # criterion = nn.CrossEntropyLoss()
     # optimizer = optim.Adam(nw.parameters(), lr=0.001)
     optimizer = optim.SGD(nw.parameters(), lr=0.001, momentum=0.4)
     nw = nw.to(device)
-    train(train_options, criterion, data_loader, device, nw, optimizer)
-    loss = validate(data_loader_valid, device, nw)
+    train(train_options, criterion, data_loader['train'], device, nw, optimizer)
+    loss = validate(data_loader['valid'], device, nw)
     return loss
 
 
 def validate(data_loader, device, nw):
-
     print("Validating...")
     loss = 0
     for batch_idx, (data, target) in enumerate(data_loader):
@@ -94,7 +91,14 @@ def train(options, criterion, data_loader, device, nw, optimizer):
                 running_loss = 0.0
 
 
-def get_dataloader(x, y, batch_size=None):
+def get_data_loader_from_file_name(file_name_x, file_name_y, batch_size=None):
+    base_dir = os.getcwd()
+    x = pd.read_csv(os.path.join(base_dir, file_name_x))
+    y = pd.read_csv(os.path.join(base_dir, file_name_y))
+    return get_data_loader(x, y, batch_size)
+
+
+def get_data_loader(x, y, batch_size=None):
     # noinspection PyUnusedLocal
     common_keys = pd.Index(x.iloc[:, 0]).intersection(pd.Index(y.iloc[:, 0]))
     x_id_col_name = x.axes[1][0]
@@ -117,6 +121,7 @@ def get_parser():
     parser.add_argument('--y', action="store", default="y.csv")
     parser.add_argument('--xvalid', action="store", default="x_valid.csv")
     parser.add_argument('--yvalid', action="store", default="y_valid.csv")
+    parser.add_argument('--size_hidden', nargs="+", type=int, default=[4, 8])
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--epochs', action="store", type=int, default=300)
     parser.add_argument('--print_every', action="store", type=int, default=64)

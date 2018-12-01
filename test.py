@@ -12,14 +12,16 @@ class PtbTestCase(unittest.TestCase):
         pass
 
     def test_run_linear(self):
+        data_loader = {}
         dataset = utils_data.TensorDataset(
             torch.FloatTensor([1, 2, 3, 4, 5, 6, 7, 8, 9]),
             torch.FloatTensor([3, 6, 9, 12, 15, 18, 21, 24, 27]))
-        data_loader_train = utils_data.DataLoader(dataset)
+        data_loader['train'] = utils_data.DataLoader(dataset)
         dataset = utils_data.TensorDataset(
             torch.FloatTensor([10, 11, 12]),
             torch.FloatTensor([30, 33, 36]))
-        data_loader_valid = utils_data.DataLoader(dataset)
+        data_loader['valid'] = utils_data.DataLoader(dataset)
         train_options = main.TrainOptions(50, 100, True)
-        loss = main.run(data_loader_train, data_loader_valid, 1, 1, [4, 8], train_options)
+        network_options = main.NetworkOptions(1, 1, [4, 8])
+        loss = main.run(data_loader, network_options, train_options)
         self.assertLess(loss, 1)
