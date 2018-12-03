@@ -1,10 +1,15 @@
 import argparse
+import logging
+
 from common.csv_data_provider import CsvDataProvider
+from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions
-from components.pytorch.PyTorchNetwork import PyTorchNetwork
+from components.pytorch.pytorch_network import PytorchNetwork
 
 
 def main():
+    logging.basicConfig(level=0)
+
     args = get_parser().parse_args()
 
     data_provider = CsvDataProvider()
@@ -17,8 +22,10 @@ def main():
     num_features_out = data['train'][1].shape[1]
     network_options = NetworkOptions(num_features_in, num_features_out, args.size_hidden)
 
-    network = PyTorchNetwork()
-    network.run(data, network_options, train_options)
+    network = PytorchNetwork()
+    optimizer = Optimizer()
+    result = optimizer.run(network, data, network_options, train_options)
+    logging.info(f"Minimum loss: {result['loss']}")
 
 
 def get_parser():

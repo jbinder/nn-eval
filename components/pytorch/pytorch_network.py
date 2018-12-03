@@ -1,14 +1,17 @@
+import logging
 from math import fabs
 
 import torch
 import torch.utils.data as utils_data
 from torch import nn, optim
 
+from components.network import Network as ANetwork
 from components.pytorch.fc_model import Network
 
 
-class PyTorchNetwork:
+class PytorchNetwork(ANetwork):
     def __init__(self):
+        super().__init__()
         self.use_deterministic_behavior = False
 
     def run(self, data, network_options, train_options):
@@ -20,7 +23,7 @@ class PyTorchNetwork:
         device = self._get_device(train_options.use_gpu)
         if self.use_deterministic_behavior:
             torch.manual_seed(42)
-            torch.cuda.manual_seed(42)
+            torch.cuda.manual_seed_all(42)
         nw = Network(
             network_options.input_layer_size,
             network_options.output_layer_size,
@@ -33,17 +36,21 @@ class PyTorchNetwork:
         nw = nw.to(device)
         self.train(train_options, criterion, data_loaders['train'], device, nw, optimizer)
         loss = self.validate(data_loaders['valid'], device, nw)
-        return loss
+        seeds = {
+            'torch': torch.initial_seed(),
+            'torch.cuda': torch.cuda.initial_seed(),
+        }
+        return loss, seeds
 
     def validate(self, data_loader, device, nw):
-        print("Validating...")
+        logging.info("Validating...")
         loss = 0
         for batch_idx, (data, target) in enumerate(data_loader):
             actual = self.predict(device, nw, data)
             current_loss = fabs(target.item() - actual.item())
             loss += current_loss
-            print(f"input: {data.item()}, expected: {target.item()}, actual: {actual.item()}, loss: {current_loss}")
-        print(f"total loss: {loss}")
+            logging.info(f"input: {data.item()}, expected: {target.item()}, actual: {actual.item()}, loss: {current_loss}")
+        logging.info(f"total loss: {loss}")
         return loss
 
     def predict(self, device, nw, data):
@@ -67,10 +74,11 @@ class PyTorchNetwork:
                 optimizer.step()
                 running_loss += loss.item()
                 if batch_idx % options.print_every == 0:
-                    print("Epoch: {}/{}.. ".format(epoch + 1, options.num_epochs),
-                          "Progress~: {:.2f}.. ".format(
-                              ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100),
-                          "Training Loss: {:.3f}.. ".format(running_loss / options.print_every))
+                    info = "Epoch: {}/{}.. ".format(epoch + 1, options.num_epochs) + \
+                           "\nProgress~: {:.2f}.. ".format(
+                                ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
+                           "\nTraining Loss: {:.3f}.. ".format(running_loss / options.print_every)
+                    logging.info(info)
                     running_loss = 0.0
 
     def _get_device(self, gpu):
