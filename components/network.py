@@ -9,3 +9,10 @@ class Network(abc.ABC):
     # def run(self, company_name: str, id: int) -> Employee
     def run(self, data: dict, network_options: NetworkOptions, train_options: TrainOptions) -> (int, dict):
         pass
+
+    @abc.abstractmethod
+    def save(self, path: str) -> None:
+        pass
+
+    # def load(self, path: str) -> '__class__':
+    #     pass
