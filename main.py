@@ -3,7 +3,7 @@ import logging
 
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
-from common.options import TrainOptions, NetworkOptions
+from common.options import TrainOptions, NetworkOptions, OptimizerOptions
 from components.pytorch.pytorch_network import PytorchNetwork
 
 
@@ -16,7 +16,7 @@ def main():
     data = {'train': data_provider.get_data_from_file(args.x, args.y),
             'valid': data_provider.get_data_from_file(args.xvalid, args.yvalid)}
 
-    train_options = TrainOptions(args.epochs, args.print_every, args.gpu, args.model_file)
+    train_options = TrainOptions(args.epochs, args.print_every, args.gpu)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -24,7 +24,7 @@ def main():
 
     network = PytorchNetwork()
     optimizer = Optimizer()
-    result = optimizer.run(network, data, network_options, train_options)
+    result = optimizer.run(network, data, network_options, train_options, OptimizerOptions(args.model_file))
     logging.info(f"Minimum loss: {result['loss']}")
 
 

@@ -10,7 +10,9 @@ class Optimizer:
         best = {'loss': None}
         for i in range(1, 11):
             logging.info(f"Run #{i}...")
-            loss, parameters = network.run(data, network_options, train_options)
+            network.init(data, network_options, train_options)
+            network.train()
+            loss = network.validate()
             if best['loss'] is None or loss < best['loss']:
                 best['loss'] = loss
                 if optimizer_options.save_path is not None:
