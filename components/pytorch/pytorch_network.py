@@ -51,20 +51,22 @@ class PytorchNetwork(ANetwork):
         logging.info("Validating...")
         loss = 0
         for batch_idx, (data, target) in enumerate(self.data_loaders['valid']):
-            actual = self.predict(self.device, self.nw, data)
-            current_loss = fabs(target.item() - actual.item())
+            actual = self.predict(data)
+            current_loss = fabs(target.item() - actual)
             loss += current_loss
-            logging.info(f"input: {data.item()}, expected: {target.item()}, actual: {actual.item()},"
+            logging.info(f"input: {data.item()}, expected: {target.item()}, actual: {actual},"
                          f"loss: {current_loss}")
         logging.info(f"total loss: {loss}")
         return loss
 
-    def predict(self, device, nw, data):
-        nw.eval()
+    def predict(self, data):
+        if not self.device:  # TODO: fallback, remove
+            self.device = self._get_device(True)
+        self.nw.eval()
         with torch.no_grad():
             # noinspection PyCallingNonCallable
-            output = nw.forward(torch.tensor(data).to(device).float())
-        return output
+            output = self.nw.forward(torch.tensor(data).to(self.device).float())
+        return output.item()
 
     def train(self):
         self.nw.train()

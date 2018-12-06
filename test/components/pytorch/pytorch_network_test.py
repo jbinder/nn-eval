@@ -38,6 +38,11 @@ class PyTorchNetworkTest(unittest.TestCase):
         loss = network.validate()
         self.assertLess(loss, 2)
 
+    def test_predict(self):
+        network = self._get_trained_network()
+        actual = network.predict([2])
+        self.assertAlmostEqual(6, actual, 0)
+
     @staticmethod
     def _get_data_linear():
         return {
@@ -48,7 +53,7 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     def _get_trained_network(self):
         data = self._get_data_linear()
-        train_options = TrainOptions(50, 100, True)
+        train_options = TrainOptions(500, 100, True)
         network_options = NetworkOptions(1, 1, [4, 8])
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
