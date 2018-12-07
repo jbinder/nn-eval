@@ -2,7 +2,7 @@ import os
 import unittest
 
 from common.options import TrainOptions, NetworkOptions
-from components.pytorch.pytorch_network import PytorchNetwork
+from networks.pytorch.pytorch_network import PytorchNetwork
 
 
 class PyTorchNetworkTest(unittest.TestCase):

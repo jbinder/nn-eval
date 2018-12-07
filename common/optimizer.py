@@ -1,7 +1,7 @@
 import logging
 
 from common.options import NetworkOptions, TrainOptions, OptimizerOptions
-from components.network import Network
+from networks.network import Network
 
 
 class Optimizer:

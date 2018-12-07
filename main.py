@@ -4,7 +4,7 @@ import logging
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
-from components.pytorch.pytorch_network import PytorchNetwork
+from networks.pytorch.pytorch_network import PytorchNetwork
 
 
 def main():

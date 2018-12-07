@@ -5,9 +5,9 @@ import torch
 import torch.utils.data as utils_data
 from torch import nn, optim
 
-import components
-from components.network import Network as ANetwork
-from components.pytorch.fc_model import Network
+import networks
+from networks.network import Network as ANetwork
+from networks.pytorch.fc_model import Network
 
 
 class PytorchNetwork(ANetwork):
@@ -99,7 +99,7 @@ class PytorchNetwork(ANetwork):
                       'state_dict': self.nw.state_dict()}
         torch.save(checkpoint, path)
 
-    def load(self, path: str) -> components.network:
+    def load(self, path: str) -> networks.network:
         checkpoint = torch.load(path)
         # TODO: make static and load to new network?
         #model = PytorchNetwork()
