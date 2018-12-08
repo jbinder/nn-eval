@@ -39,7 +39,7 @@ class PytorchNetwork(ANetwork):
         self.criterion = nn.MSELoss()
         # criterion = nn.CrossEntropyLoss()
         # optimizer = optim.Adam(nw.parameters(), lr=0.001)
-        self.optimizer = optim.SGD(self.nw.parameters(), lr=0.001, momentum=0.4)
+        self.optimizer = self._get_optimizer()
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
 #        seeds = {
@@ -60,8 +60,6 @@ class PytorchNetwork(ANetwork):
         return loss
 
     def predict(self, data):
-        if not self.device:  # TODO: fallback, remove
-            self.device = self._get_device(True)
         self.nw.eval()
         with torch.no_grad():
             # noinspection PyCallingNonCallable
@@ -101,11 +99,14 @@ class PytorchNetwork(ANetwork):
 
     def load(self, path: str) -> networks.network:
         checkpoint = torch.load(path)
-        # TODO: make static and load to new network?
-        #model = PytorchNetwork()
-        #model.nw = Network(checkpoint['input_size'], checkpoint['output_size'],
-        #                   checkpoint['hidden_layer_sizes'])
-        # TODO: optimizer.load_state_dict(checkpoint['optimizer_state'])
+        self.nw = PytorchNetwork()
+        self.nw = Network(checkpoint['input_size'], checkpoint['output_size'],
+                          checkpoint['hidden_layer_sizes'], 0)
+        if not self.device:  # TODO: fallback, remove
+            self.device = self._get_device(True)
+        self.nw = self.nw.to(self.device)
+        self.optimizer = self._get_optimizer()
+        self.optimizer.load_state_dict(checkpoint['optimizer_state'])
         self.nw.load_state_dict(checkpoint['state_dict'])
         return self
 
@@ -120,3 +121,5 @@ class PytorchNetwork(ANetwork):
         return utils_data.DataLoader(training_samples, batch_size=batch_size,
                                      shuffle=not self.use_deterministic_behavior)
 
+    def _get_optimizer(self):
+        return optim.SGD(self.nw.parameters(), lr=0.001, momentum=0.4)

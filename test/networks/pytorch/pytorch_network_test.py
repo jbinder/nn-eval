@@ -37,11 +37,25 @@ class PyTorchNetworkTest(unittest.TestCase):
 
         loss = network.validate()
         self.assertLess(loss, 2)
+        os.remove(file_name)
 
     def test_predict(self):
         network = self._get_trained_network()
         actual = network.predict([2])
         self.assertAlmostEqual(6, actual, 0)
+
+    def test_predict_after_load(self):
+        network = self._get_trained_network()
+        file_name = "tmp.pth"
+        network.save(file_name)
+
+        network = PytorchNetwork()
+        network.load(file_name)
+
+        actual = network.predict([2])
+
+        self.assertAlmostEqual(6, actual, 0)
+        os.remove(file_name)
 
     @staticmethod
     def _get_data_linear():
