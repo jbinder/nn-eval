@@ -11,7 +11,7 @@ class Network(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def train(self):
+    def train(self) -> None:
         pass
 
     @abc.abstractmethod

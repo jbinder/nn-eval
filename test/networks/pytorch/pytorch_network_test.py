@@ -11,19 +11,19 @@ class PyTorchNetworkTest(unittest.TestCase):
         pass
 
     def test_run_linear(self):
-        network = self._get_trained_network()
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         loss = network.validate()
         self.assertLess(loss, 2)
 
     def test_save(self):
-        network = self._get_trained_network()
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         file_name = "tmp.pth"
         network.save(file_name)
         self.assertTrue(os.path.isfile(file_name))
         os.remove(file_name)
 
     def test_load(self):
-        network = self._get_trained_network()
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         file_name = "tmp.pth"
         network.save(file_name)
 
@@ -40,12 +40,12 @@ class PyTorchNetworkTest(unittest.TestCase):
         os.remove(file_name)
 
     def test_predict(self):
-        network = self._get_trained_network()
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         actual = network.predict([2])
         self.assertAlmostEqual(6, actual, 0)
 
     def test_predict_after_load(self):
-        network = self._get_trained_network()
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         file_name = "tmp.pth"
         network.save(file_name)
 
@@ -65,10 +65,13 @@ class PyTorchNetworkTest(unittest.TestCase):
                 [[3], [6], [9], [12], [15], [18], [21], [24], [27]]),
             'valid': ([[10], [11], [12]], [[30], [33], [36]])}
 
-    def _get_trained_network(self):
-        data = self._get_data_linear()
+    @staticmethod
+    def _get_hidden_layer_sizes_linear():
+        return [4, 8]
+
+    def _get_trained_network(self, data, hidden_layer_sizes):
         train_options = TrainOptions(500, 100, True)
-        network_options = NetworkOptions(1, 1, [4, 8])
+        network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
         network.train()

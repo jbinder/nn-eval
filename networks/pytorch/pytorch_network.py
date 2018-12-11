@@ -1,5 +1,6 @@
 import logging
 from math import fabs
+from typing import Any
 
 import torch
 import torch.utils.data as utils_data
@@ -59,14 +60,14 @@ class PytorchNetwork(ANetwork):
         logging.info(f"total loss: {loss}")
         return loss
 
-    def predict(self, data):
+    def predict(self, data) -> Any:
         self.nw.eval()
         with torch.no_grad():
             # noinspection PyCallingNonCallable
             output = self.nw.forward(torch.tensor(data).to(self.device).float())
         return output.item()
 
-    def train(self):
+    def train(self) -> None:
         self.nw.train()
         data_loader = self.data_loaders['train']
         for epoch in range(self.train_options.num_epochs):
