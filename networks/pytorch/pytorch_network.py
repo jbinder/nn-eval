@@ -23,12 +23,13 @@ class PytorchNetwork(ANetwork):
         self.device = None
 
     def init(self, data, network_options, train_options):
+        self.device = self._get_device(train_options.use_gpu)
+
         self.data_loaders = {
             'train': self._get_data_loader(data['train'][0], data['train'][1]),
             'valid': self._get_data_loader(data['valid'][0], data['valid'][1], 1),
         }
 
-        self.device = self._get_device(train_options.use_gpu)
         if self.use_deterministic_behavior:
             torch.manual_seed(42)
             torch.cuda.manual_seed_all(42)
@@ -39,7 +40,6 @@ class PytorchNetwork(ANetwork):
             0)
         self.criterion = nn.MSELoss()
         # criterion = nn.CrossEntropyLoss()
-        # optimizer = optim.Adam(nw.parameters(), lr=0.001)
         self.optimizer = self._get_optimizer()
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
@@ -52,20 +52,25 @@ class PytorchNetwork(ANetwork):
         logging.info("Validating...")
         loss = 0
         for batch_idx, (data, target) in enumerate(self.data_loaders['valid']):
-            actual = self.predict(data)
-            current_loss = fabs(target.item() - actual)
+            target = target.to(self.device)
+            actual = self._forward(data)
+            current_loss = self.criterion(actual, target).item()
             loss += current_loss
-            logging.info(f"input: {data.item()}, expected: {target.item()}, actual: {actual},"
+            logging.info(f"input: {data.numpy()}, expected: {target.item()}, actual: {actual.cpu().numpy()},"
                          f"loss: {current_loss}")
         logging.info(f"total loss: {loss}")
         return loss
 
     def predict(self, data) -> Any:
+        output = self._forward(data)
+        return output.cpu().numpy()
+
+    def _forward(self, data):
         self.nw.eval()
         with torch.no_grad():
             # noinspection PyCallingNonCallable
             output = self.nw.forward(torch.tensor(data).to(self.device).float())
-        return output.item()
+        return output
 
     def train(self) -> None:
         self.nw.train()
@@ -123,4 +128,5 @@ class PytorchNetwork(ANetwork):
                                      shuffle=not self.use_deterministic_behavior)
 
     def _get_optimizer(self):
+        #return optim.Adam(self.nw.parameters(), lr=0.001)
         return optim.SGD(self.nw.parameters(), lr=0.001, momentum=0.4)
