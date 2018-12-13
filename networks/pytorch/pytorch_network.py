@@ -40,7 +40,7 @@ class PytorchNetwork(ANetwork):
             0)
         self.criterion = nn.MSELoss()
         # criterion = nn.CrossEntropyLoss()
-        self.optimizer = self._get_optimizer()
+        self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
 #        seeds = {
@@ -100,7 +100,9 @@ class PytorchNetwork(ANetwork):
                       'hidden_layer_sizes': [each.out_features for each in self.nw.hidden_layers],
                       'optimizer_state': self.optimizer.state_dict(),
                       'epochs': self.train_options.num_epochs,
-                      'state_dict': self.nw.state_dict()}
+                      'state_dict': self.nw.state_dict(),
+                      'optimizer': self.train_options.optimizer,
+                      }
         torch.save(checkpoint, path)
 
     def load(self, path: str) -> networks.network:
@@ -111,7 +113,7 @@ class PytorchNetwork(ANetwork):
         if not self.device:  # TODO: fallback, remove
             self.device = self._get_device(True)
         self.nw = self.nw.to(self.device)
-        self.optimizer = self._get_optimizer()
+        self.optimizer = self._get_optimizer(checkpoint['optimizer'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state'])
         self.nw.load_state_dict(checkpoint['state_dict'])
         return self
@@ -127,6 +129,5 @@ class PytorchNetwork(ANetwork):
         return utils_data.DataLoader(training_samples, batch_size=batch_size,
                                      shuffle=not self.use_deterministic_behavior)
 
-    def _get_optimizer(self):
-        #return optim.Adam(self.nw.parameters(), lr=0.001)
-        return optim.SGD(self.nw.parameters(), lr=0.001, momentum=0.4)
+    def _get_optimizer(self, optimizer):
+        return getattr(optim, optimizer)(self.nw.parameters(), lr=0.001)  # TODO: set momentum for SGD?

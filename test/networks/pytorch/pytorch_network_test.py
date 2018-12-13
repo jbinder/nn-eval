@@ -21,9 +21,9 @@ class PyTorchNetworkTest(unittest.TestCase):
         self.assertLess(loss, 2)
 
     def test_run_linear_2_vars(self):
-        network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64])
+        network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64], 1500, "Adam")
         loss = network.validate()
-        self.assertLess(loss, 2)
+        self.assertLess(loss, 5)
 
     def test_save(self):
         network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
@@ -38,7 +38,7 @@ class PyTorchNetworkTest(unittest.TestCase):
         network.save(file_name)
 
         data = self._get_data_linear()
-        train_options = TrainOptions(50, 100, True)
+        train_options = TrainOptions(50, 100, True, "SGD")
         network_options = NetworkOptions(1, 1, [4, 8])
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
@@ -89,8 +89,8 @@ class PyTorchNetworkTest(unittest.TestCase):
     def _get_hidden_layer_sizes_linear():
         return [4, 8]
 
-    def _get_trained_network(self, data, hidden_layer_sizes):
-        train_options = TrainOptions(500, 100, True)
+    def _get_trained_network(self, data, hidden_layer_sizes, num_epochs=500, optimizer="SGD"):
+        train_options = TrainOptions(num_epochs, 100, True, optimizer)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
