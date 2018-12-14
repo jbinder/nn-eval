@@ -16,7 +16,7 @@ def main():
     data = {'train': data_provider.get_data_from_file(args.x, args.y),
             'valid': data_provider.get_data_from_file(args.xvalid, args.yvalid)}
 
-    train_options = TrainOptions(args.epochs, args.print_every, args.gpu, args.optimizer)
+    train_options = TrainOptions(args.epochs, args.print_every, args.gpu, args.optimizer, args.loss_function)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -39,6 +39,7 @@ def get_parser():
     parser.add_argument('--size_hidden', nargs="+", type=int, default=[4, 8])
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--optimizer', action="store", default="SGD")
+    parser.add_argument('--loss_function', action="store", default="MSELoss")
     parser.add_argument('--epochs', action="store", type=int, default=300)
     parser.add_argument('--print_every', action="store", type=int, default=64)
     parser.add_argument('--model_file', action="store", default=None)

@@ -38,7 +38,7 @@ class PytorchNetwork(ANetwork):
             network_options.output_layer_size,
             network_options.hidden_layer_sizes,
             0)
-        self.criterion = nn.MSELoss()
+        self.criterion = self._get_loss_function(train_options.loss_function)
         # criterion = nn.CrossEntropyLoss()
         self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
@@ -131,3 +131,6 @@ class PytorchNetwork(ANetwork):
 
     def _get_optimizer(self, optimizer):
         return getattr(optim, optimizer)(self.nw.parameters(), lr=0.001)  # TODO: set momentum for SGD?
+
+    def _get_loss_function(self, loss_function):
+        return getattr(nn, loss_function)()
