@@ -1,17 +1,30 @@
+import array
 import logging
-from math import fabs
 from typing import Any
 
 import torch
 import torch.utils.data as utils_data
 from torch import nn, optim
+# noinspection PyProtectedMember
+from torch.nn.modules.loss import _Loss
+from torch.optim import Optimizer
 
 import networks
+from common.options import TrainOptions
 from networks.network import Network as ANetwork
 from networks.pytorch.fc_model import Network
 
 
 class PytorchNetwork(ANetwork):
+
+    use_deterministic_behavior: bool
+    nw: Network
+    optimizer: Optimizer
+    criterion: _Loss
+    train_options: TrainOptions
+    data_loaders: array
+    device: torch.device
+
     def __init__(self):
         super().__init__()
         self.use_deterministic_behavior = False
@@ -39,7 +52,6 @@ class PytorchNetwork(ANetwork):
             network_options.hidden_layer_sizes,
             0)
         self.criterion = self._get_loss_function(train_options.loss_function)
-        # criterion = nn.CrossEntropyLoss()
         self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
@@ -84,6 +96,7 @@ class PytorchNetwork(ANetwork):
                 outputs = self.nw(data)
                 loss = self.criterion(outputs, target)
                 loss.backward()
+                # noinspection PyArgumentList
                 self.optimizer.step()
                 running_loss += loss.item()
                 if batch_idx % self.train_options.print_every == 0:
@@ -118,7 +131,8 @@ class PytorchNetwork(ANetwork):
         self.nw.load_state_dict(checkpoint['state_dict'])
         return self
 
-    def _get_device(self, gpu):
+    @staticmethod
+    def _get_device(gpu):
         return torch.device("cuda:0" if gpu and torch.cuda.is_available() else "cpu")
 
     def _get_data_loader(self, x, y, batch_size=None):
@@ -132,5 +146,6 @@ class PytorchNetwork(ANetwork):
     def _get_optimizer(self, optimizer):
         return getattr(optim, optimizer)(self.nw.parameters(), lr=0.001)  # TODO: set momentum for SGD?
 
-    def _get_loss_function(self, loss_function):
+    @staticmethod
+    def _get_loss_function(loss_function):
         return getattr(nn, loss_function)()

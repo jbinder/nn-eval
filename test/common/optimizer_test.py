@@ -18,7 +18,7 @@ class OptimizerTest(unittest.TestCase):
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, None, TrainOptions(None, None, None, None, "MSELoss"), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(10, network_mock.init.call_count)
+        self.assertEqual(optimizer.num_runs_per_setting, network_mock.init.call_count)
 
     def test_run_no_loss_function_specified_should_enumerate_over_all_loss_functions(self):
         network_mock = Mock()
@@ -26,4 +26,4 @@ class OptimizerTest(unittest.TestCase):
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, None, TrainOptions(None, None, None, None, None), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(20, network_mock.init.call_count)
+        self.assertEqual(optimizer.num_runs_per_setting * len(optimizer.loss_functions), network_mock.init.call_count)
