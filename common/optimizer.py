@@ -13,12 +13,12 @@ class Optimizer:
 
     def __init__(self):
         self.num_runs_per_setting = 10
-        self.loss_functions = ["L1Loss", "MSELoss", "CrossEntropyLoss"]
+        self.loss_functions = ["L1Loss", "MSELoss"]  # TODO: "CrossEntropyLoss"
         self.optimizers = ["SGD", "Adam"]
 
     def run(self, network: Network, data: dict, network_options: NetworkOptions, train_options: TrainOptions,
             optimizer_options: OptimizerOptions):
-        best = {'loss': None}
+        best = {'loss': None, 'train_options': None}
         # for all optimizers ...
         optimizers = self.optimizers if train_options.optimizer is None else [train_options.optimizer]
         for optimizer in optimizers:
@@ -36,14 +36,15 @@ class Optimizer:
         return best
 
     @staticmethod
-    def _run_once(best, current_train_options, data, i, network, network_options, optimizer_options):
-        logging.info(f"Run #{i}: {current_train_options}...")
-        network.init(data, network_options, current_train_options)
+    def _run_once(best, train_options, data, i, network, network_options, optimizer_options):
+        logging.info(f"Run #{i}: {train_options}...")
+        network.init(data, network_options, train_options)
         network.train()
         loss = network.validate()
         logging.info(f"Loss: {loss}")
         if best['loss'] is None or loss < best['loss']:
             logging.info("New best run!")
             best['loss'] = loss
+            best['train_options'] = train_options
             if optimizer_options.save_path is not None:
                 network.save(optimizer_options.save_path)

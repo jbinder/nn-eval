@@ -106,7 +106,8 @@ class PyTorchNetworkTest(unittest.TestCase):
     def _get_hidden_layer_sizes_linear():
         return [4, 8]
 
-    def _get_trained_network(self, data, hidden_layer_sizes, num_epochs=500, optimizer="SGD", loss_function="MSELoss"):
+    @staticmethod
+    def _get_trained_network(data, hidden_layer_sizes, num_epochs=500, optimizer="SGD", loss_function="MSELoss"):
         train_options = TrainOptions(num_epochs, 100, True, optimizer, loss_function)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
