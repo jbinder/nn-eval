@@ -19,7 +19,7 @@ class Optimizer:
 
     def run(self, network: Network, data: dict, network_options: NetworkOptions, train_options: TrainOptions,
             optimizer_options: OptimizerOptions):
-        best = {'loss': None, 'train_options': None}
+        best = {'loss': None, 'train_options': None, 'network_options': None}
         # for all hidden layers
         all_hidden_layer_sizes = self.hidden_layers if network_options.hidden_layer_sizes is None else \
             [network_options.hidden_layer_sizes]
@@ -53,5 +53,6 @@ class Optimizer:
             logging.info("New best run!")
             best['loss'] = loss
             best['train_options'] = train_options
+            best['network_options'] = network_options
             if optimizer_options.save_path is not None:
                 network.save(optimizer_options.save_path)

@@ -25,7 +25,7 @@ def main():
     network = PytorchNetwork()
     optimizer = Optimizer()
     result = optimizer.run(network, data, network_options, train_options, OptimizerOptions(args.model_file))
-    logging.info(f"Minimum loss: {result['loss']}")
+    logging.info(f"Minimum loss: {result['loss']} (details: {result})")
 
 
 def get_parser():
