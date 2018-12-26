@@ -21,6 +21,7 @@ class PytorchNetwork(ANetwork):
     nw: Network
     optimizer: Optimizer
     criterion: _Loss
+    validation_criterion: _Loss
     train_options: TrainOptions
     data_loaders: array
     device: torch.device
@@ -31,6 +32,7 @@ class PytorchNetwork(ANetwork):
         self.nw = None
         self.optimizer = None
         self.criterion = None
+        self.validation_criterion = None
         self.train_options = None
         self.data_loaders = None
         self.device = None
@@ -52,6 +54,7 @@ class PytorchNetwork(ANetwork):
             network_options.hidden_layer_sizes,
             0)
         self.criterion = self._get_loss_function(train_options.loss_function)
+        self.validation_criterion = nn.MSELoss()
         self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
@@ -66,7 +69,7 @@ class PytorchNetwork(ANetwork):
         for batch_idx, (data, target) in enumerate(self.data_loaders['valid']):
             target = target.to(self.device)
             actual = self._forward(data)
-            current_loss = self.criterion(actual, target).item()
+            current_loss = self.validation_criterion(actual, target).item()
             loss += current_loss
             logging.info(f"input: {data.numpy()}, expected: {target.item()}, actual: {actual.cpu().numpy()},"
                          f"loss: {current_loss}")
