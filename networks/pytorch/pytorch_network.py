@@ -25,6 +25,7 @@ class PytorchNetwork(ANetwork):
     train_options: TrainOptions
     data_loaders: array
     device: torch.device
+    default_max_epochs: int
 
     def __init__(self):
         super().__init__()
@@ -36,6 +37,7 @@ class PytorchNetwork(ANetwork):
         self.train_options = None
         self.data_loaders = None
         self.device = None
+        self.default_max_epochs = 100000
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
@@ -90,7 +92,12 @@ class PytorchNetwork(ANetwork):
     def train(self) -> None:
         self.nw.train()
         data_loader = self.data_loaders['train']
-        for epoch in range(self.train_options.num_epochs):
+        max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
+            else self.default_max_epochs
+        batch_count = 10
+        last_batch = []
+        current_batch = []
+        for epoch in range(max_epochs):
             running_loss = 0.0
             for batch_idx, (data, target) in enumerate(data_loader):
                 data = data.to(self.device)
@@ -109,6 +116,15 @@ class PytorchNetwork(ANetwork):
                            "\nTraining Loss: {:.3f}.. ".format(running_loss / self.train_options.print_every)
                     logging.info(info)
                     running_loss = 0.0
+                current_batch.append(loss.item())
+                if len(current_batch) >= batch_count:
+                    if len(last_batch) < 1 or (min(current_batch) - min(last_batch) < -0.001):
+                        last_batch.clear()
+                        last_batch.extend(current_batch)
+                        current_batch.clear()
+                    else:
+                        logging.info("No more progress, done.")
+                        return
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
