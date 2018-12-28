@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import unittest
 
 from numpy.ma import arange
@@ -21,6 +22,11 @@ class PyTorchNetworkTest(unittest.TestCase):
         network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
         loss = network.validate()
         self.assertLess(loss, 2)
+
+    def test_run_linear_stops_if_done_learning(self):
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(), sys.maxsize)
+        best = network.train()
+        self.assertLess(best, sys.maxsize)
 
     def test_run_linear_2_vars(self):
         network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64], 1500, "Adam")

@@ -46,13 +46,15 @@ class Optimizer:
     def _run_once(best, train_options, data, i, network, network_options, optimizer_options):
         logging.info(f"Run #{i}: {train_options}, {network_options}...")
         network.init(data, network_options, train_options)
-        network.train()
+        num_epochs = network.train()
         loss = network.validate()
         logging.info(f"Loss: {loss}")
         if best['loss'] is None or loss < best['loss']:
+            actual_train_options = TrainOptions(num_epochs, train_options.print_every, train_options.use_gpu,
+                                                train_options.optimizer, train_options.loss_function)
             logging.info("New best run!")
             best['loss'] = loss
-            best['train_options'] = train_options
+            best['train_options'] = actual_train_options
             best['network_options'] = network_options
             if optimizer_options.save_path is not None:
                 network.save(optimizer_options.save_path)

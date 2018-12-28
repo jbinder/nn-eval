@@ -89,7 +89,7 @@ class PytorchNetwork(ANetwork):
             output = self.nw.forward(torch.tensor(data).to(self.device).float())
         return output
 
-    def train(self) -> None:
+    def train(self) -> int:
         self.nw.train()
         data_loader = self.data_loaders['train']
         max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
@@ -97,7 +97,7 @@ class PytorchNetwork(ANetwork):
         batch_count = 10
         last_batch = []
         current_batch = []
-        for epoch in range(max_epochs):
+        for epoch in range(1, max_epochs):
             running_loss = 0.0
             for batch_idx, (data, target) in enumerate(data_loader):
                 data = data.to(self.device)
@@ -110,7 +110,7 @@ class PytorchNetwork(ANetwork):
                 self.optimizer.step()
                 running_loss += loss.item()
                 if batch_idx % self.train_options.print_every == 0:
-                    info = "Epoch: {}/{}.. ".format(epoch + 1, self.train_options.num_epochs) + \
+                    info = "Epoch: {}/{}.. ".format(epoch, self.train_options.num_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
                                 ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
                            "\nTraining Loss: {:.3f}.. ".format(running_loss / self.train_options.print_every)
@@ -124,7 +124,8 @@ class PytorchNetwork(ANetwork):
                         current_batch.clear()
                     else:
                         logging.info("No more progress, done.")
-                        return
+                        return epoch
+        return max_epochs
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
