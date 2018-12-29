@@ -110,7 +110,7 @@ class PytorchNetwork(ANetwork):
                 self.optimizer.step()
                 running_loss += loss.item()
                 if batch_idx % self.train_options.print_every == 0:
-                    info = "Epoch: {}/{}.. ".format(epoch, self.train_options.num_epochs) + \
+                    info = "Epoch: {}/{}.. ".format(epoch, max_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
                                 ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
                            "\nTraining Loss: {:.3f}.. ".format(running_loss / self.train_options.print_every)
