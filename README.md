@@ -2,6 +2,9 @@ nn-eval
 =======
 
 Evaluates different neural network libraries on simple datasets.
+
+For unspecified training and network options it will try to determine the best values.
+
 Currently only PyTorch is supported.
 
 

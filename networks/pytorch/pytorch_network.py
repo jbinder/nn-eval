@@ -43,7 +43,7 @@ class PytorchNetwork(ANetwork):
         self.device = self._get_device(train_options.use_gpu)
 
         self.data_loaders = {
-            'train': self._get_data_loader(data['train'][0], data['train'][1]),
+            'train': self._get_data_loader(data['train'][0], data['train'][1], train_options.batch_size),
             'valid': self._get_data_loader(data['valid'][0], data['valid'][1], 1),
         }
 
