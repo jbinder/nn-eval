@@ -26,6 +26,7 @@ class PytorchNetwork(ANetwork):
     data_loaders: array
     device: torch.device
     default_max_epochs: int
+    progress_detection_batch_count: int
 
     def __init__(self):
         super().__init__()
@@ -38,6 +39,7 @@ class PytorchNetwork(ANetwork):
         self.data_loaders = None
         self.device = None
         self.default_max_epochs = 100000
+        self.progress_detection_batch_count = 100
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
@@ -94,7 +96,6 @@ class PytorchNetwork(ANetwork):
         data_loader = self.data_loaders['train']
         max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
             else self.default_max_epochs
-        batch_count = 10
         last_batch = []
         current_batch = []
         for epoch in range(1, max_epochs):
@@ -117,7 +118,7 @@ class PytorchNetwork(ANetwork):
                     logging.info(info)
                     running_loss = 0.0
                 current_batch.append(loss.item())
-                if len(current_batch) >= batch_count:
+                if len(current_batch) >= self.progress_detection_batch_count:
                     if len(last_batch) < 1 or (min(current_batch) - min(last_batch) < -0.001):
                         last_batch.clear()
                         last_batch.extend(current_batch)
