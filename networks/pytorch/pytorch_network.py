@@ -91,7 +91,7 @@ class PytorchNetwork(ANetwork):
             output = self.nw.forward(torch.tensor(data).to(self.device).float())
         return output
 
-    def train(self) -> int:
+    def train(self) -> TrainOptions:
         self.nw.train()
         data_loader = self.data_loaders['train']
         max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
@@ -125,8 +125,12 @@ class PytorchNetwork(ANetwork):
                         current_batch.clear()
                     else:
                         logging.info("No more progress, done.")
-                        return epoch
-        return max_epochs
+                        return self._get_train_options(data_loader.batch_size, epoch)
+        return self._get_train_options(data_loader.batch_size, max_epochs)
+
+    def _get_train_options(self, batch_size, epochs):
+        return TrainOptions(epochs, batch_size, self.train_options.print_every, self._is_gpu(str(self.device)),
+                            self.train_options.optimizer, self.train_options.loss_function)
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
@@ -155,6 +159,10 @@ class PytorchNetwork(ANetwork):
     @staticmethod
     def _get_device(gpu):
         return torch.device("cuda:0" if gpu and torch.cuda.is_available() else "cpu")
+
+    @staticmethod
+    def _is_gpu(device):
+        return True if "cuda" in device else False
 
     def _get_data_loader(self, x, y, batch_size=None):
         x = torch.FloatTensor(x)

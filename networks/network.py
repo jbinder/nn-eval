@@ -11,8 +11,8 @@ class Network(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def train(self) -> int:
-        """ :returns: the number of epochs used to train the network """
+    def train(self) -> TrainOptions:
+        """ :returns: the actual options used to train the network """
         pass
 
     @abc.abstractmethod

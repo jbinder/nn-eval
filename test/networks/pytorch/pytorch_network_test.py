@@ -26,7 +26,7 @@ class PyTorchNetworkTest(unittest.TestCase):
     def test_run_linear_stops_if_done_learning(self):
         network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(), sys.maxsize)
         best = network.train()
-        self.assertLess(best, sys.maxsize)
+        self.assertLess(best.batch_size, sys.maxsize)
 
     def test_run_linear_2_vars(self):
         network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64], 1500, "Adam")
