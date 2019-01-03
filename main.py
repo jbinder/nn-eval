@@ -13,8 +13,7 @@ def main():
     args = get_parser().parse_args()
 
     data_provider = CsvDataProvider()
-    data = {'train': data_provider.get_data_from_file(args.x, args.y),
-            'valid': data_provider.get_data_from_file(args.xvalid, args.yvalid)}
+    data = data_provider.get_data_from_file(args.x, args.y)
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer, args.loss_function)
 
@@ -34,8 +33,6 @@ def get_parser():
     )
     parser.add_argument('--x', action="store", default="x.csv")
     parser.add_argument('--y', action="store", default="y.csv")
-    parser.add_argument('--xvalid', action="store", default="x_valid.csv")
-    parser.add_argument('--yvalid', action="store", default="y_valid.csv")
     parser.add_argument('--size_hidden', nargs="+", type=int, default=None)
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--optimizer', action="store", default=None)
