@@ -35,8 +35,26 @@ Run the app:
 The app gets the input from two CSV files, where one (x.csv) contains the input, and the other (y.csv) the expected output.
 The first column of each CSV is treated as identity column.
 Only rows where the identity exists in both CSV files are included.
-Validation data is read in the same format from x_valid.csv and y_valid.csv.
+By default, 70% of the data is used for training, 30% for validation.
 For examples, see the [demo data](data).
+
+Arguments:
+
+-   **x** \<str>\: The path to the CSV file which contains input data (mandatory, default: x.csv).
+-   **y** \<str>\: The path to the CSV file which contains the output data (mandatory, default: y.csv).
+-   **size_hidden** \<int\> \<int\> ...: The list of hidden layer sizes to use (optional).
+-   **gpu** \<True/False\>: Set to True to allow using the GPU if available (optional, default: True).
+-   **optimizer** \<str\>: The optimization algorithm to use (optional).
+-   **loss_function** \<str\>: The loss function to use (optional).
+-   **epochs** \<int\>: The number of epochs to use (optional).
+-   **print_every** \<int\>: The interval in which log messages are shown (optional, default: 64).
+-   **model_file** \<str\>: The path to where to best found model should be stored to (optional).
+-   **batch_size** \<int\>: The batch size in which training should be performed (optional).
+
+Example:
+
+        # Try finding the best options for data in x.csv/y.csv ussing a hidden layer [8, 8]
+        python main.py --x x.csv --y y.csv --size_hidden 8 8
 
 
 Development

@@ -29,7 +29,7 @@ def main():
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='TODO: ',
+        description='Tries finding the best training and network options for a specified dataset.',
     )
     parser.add_argument('--x', action="store", default="x.csv")
     parser.add_argument('--y', action="store", default="y.csv")
