@@ -42,6 +42,7 @@ Arguments:
 
 -   **x** \<str>\: The path to the CSV file which contains input data (mandatory, default: x.csv).
 -   **y** \<str>\: The path to the CSV file which contains the output data (mandatory, default: y.csv).
+-   **data_train_percentage** \<float>\: The amount of data that should be used for training the network, the remaining data is used for validation  (mandatory, default: 0.7).
 -   **size_hidden** \<int\> \<int\> ...: The list of hidden layer sizes to use (optional).
 -   **gpu** \<True/False\>: Set to True to allow using the GPU if available (optional, default: True).
 -   **optimizer** \<str\>: The optimization algorithm to use (optional).
@@ -53,7 +54,7 @@ Arguments:
 
 Example:
 
-        # Try finding the best options for data in x.csv/y.csv ussing a hidden layer [8, 8]
+        # Try finding the best options for data in x.csv/y.csv using a hidden layer [8, 8]
         python main.py --x x.csv --y y.csv --size_hidden 8 8
 
 
