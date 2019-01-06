@@ -8,3 +8,4 @@ dependencies:
   - numpy
   - pandas
   - pytorch=0.4.0
+  - matplotlib
