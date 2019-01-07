@@ -1,9 +1,11 @@
 import argparse
 import logging
+import numpy as np
 
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
+from common.visualizer import Visualizer
 from networks.pytorch.pytorch_network import PytorchNetwork
 
 
@@ -26,6 +28,13 @@ def main():
     result = optimizer.run(network, data, network_options, train_options, OptimizerOptions(args.model_file))
     logging.info(f"Minimum loss: {result['loss']} (details: {result})")
 
+    if args.visualize:
+        visualizer = Visualizer()
+        x = np.concatenate((data['train'][0], data['valid'][0]), 0)
+        y = np.concatenate((data['train'][1], data['valid'][1]), 0)
+        predicted = network.predict(x)
+        visualizer.plot(x, y, predicted)
+
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -42,6 +51,7 @@ def get_parser():
     parser.add_argument('--print_every', action="store", type=int, default=64)
     parser.add_argument('--model_file', action="store", default=None)
     parser.add_argument('--batch_size', action="store", type=int, default=None)
+    parser.add_argument('--visualize', action="store", type=bool, default=True)
     return parser
 
 
