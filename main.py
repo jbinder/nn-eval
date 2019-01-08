@@ -17,7 +17,8 @@ def main():
     data_provider = CsvDataProvider()
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
 
-    train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer, args.loss_function)
+    train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
+                                 args.loss_function, args.num_runs_per_setting)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -51,6 +52,7 @@ def get_parser():
     parser.add_argument('--print_every', action="store", type=int, default=64)
     parser.add_argument('--model_file', action="store", default=None)
     parser.add_argument('--batch_size', action="store", type=int, default=None)
+    parser.add_argument('--num_runs_per_setting', action="store", type=int, default=10)
     parser.add_argument('--visualize', action="store", type=bool, default=True)
     return parser
 

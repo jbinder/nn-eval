@@ -18,40 +18,50 @@ class OptimizerTest(unittest.TestCase):
         network_mock.validate.return_value = 1
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, NetworkOptions(0, 0, []),
-                      TrainOptions(None, None, None, None, "SGD", "MSELoss"), OptimizerOptions(None))
+                      TrainOptions(None, None, None, None, "SGD", "MSELoss", None), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(optimizer.num_runs_per_setting, network_mock.init.call_count)
+        self.assertEqual(optimizer.default_num_runs_per_setting, network_mock.init.call_count)
+
+    def test_run_should_call_network_specified_times(self):
+        network_mock = Mock()
+        network_mock.validate.return_value = 1
+        optimizer = Optimizer()
+        num_runs = 100
+        optimizer.run(network_mock, {}, NetworkOptions(0, 0, []),
+                      TrainOptions(None, None, None, None, "SGD", "MSELoss", num_runs), OptimizerOptions(None))
+        network_mock.init.assert_called()
+        self.assertEqual(num_runs, network_mock.init.call_count)
 
     def test_run_no_loss_function_specified_should_enumerate_over_all_loss_functions(self):
         network_mock = Mock()
         network_mock.validate.return_value = 1
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, NetworkOptions(0, 0, []),
-                      TrainOptions(None, None, None, None, "SGD", None), OptimizerOptions(None))
+                      TrainOptions(None, None, None, None, "SGD", None, None), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(optimizer.num_runs_per_setting * len(optimizer.loss_functions), network_mock.init.call_count)
+        self.assertEqual(optimizer.default_num_runs_per_setting * len(optimizer.loss_functions), network_mock.init.call_count)
 
     def test_run_no_optimizer_specified_should_enumerate_over_all_optimizers(self):
         network_mock = Mock()
         network_mock.validate.return_value = 1
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, NetworkOptions(0, 0, []),
-                      TrainOptions(None, None, None, None, None, "MSELoss"), OptimizerOptions(None))
+                      TrainOptions(None, None, None, None, None, "MSELoss", None), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(optimizer.num_runs_per_setting * len(optimizer.optimizers), network_mock.init.call_count)
+        self.assertEqual(optimizer.default_num_runs_per_setting * len(optimizer.optimizers), network_mock.init.call_count)
 
     def test_run_no_hidden_layers_specified_should_enumerate_over_all_hidden_layers(self):
         network_mock = Mock()
         network_mock.validate.return_value = 1
         optimizer = Optimizer()
         optimizer.run(network_mock, {}, NetworkOptions(0, 0, None),
-                      TrainOptions(None, None, None, None, "SGD", "MSELoss"), OptimizerOptions(None))
+                      TrainOptions(None, None, None, None, "SGD", "MSELoss", None), OptimizerOptions(None))
         network_mock.init.assert_called()
-        self.assertEqual(optimizer.num_runs_per_setting * len(optimizer.hidden_layers), network_mock.init.call_count)
+        self.assertEqual(optimizer.default_num_runs_per_setting * len(optimizer.hidden_layers), network_mock.init.call_count)
 
     def test_run_no_optional_options_specified_using_linear_data(self):
         data = self._get_data_linear()
-        train_options = TrainOptions(None, None, 100, True, None, None)
+        train_options = TrainOptions(None, None, 100, True, None, None, None)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), None)
         network = PytorchNetwork()
         optimizer = Optimizer()

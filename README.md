@@ -51,6 +51,7 @@ Arguments:
 -   **print_every** \<int\>: The interval in which log messages are shown (optional, default: 64).
 -   **model_file** \<str\>: The path to where to best found model should be stored to (optional).
 -   **batch_size** \<int\>: The batch size in which training should be performed (optional).
+-   **num_runs_per_setting** \<int\>: To consider the random seed some libraries provide, run multiple times with the same settings (optional, default: 10).
 -   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True).
 
 Example:

@@ -130,7 +130,8 @@ class PytorchNetwork(ANetwork):
 
     def _get_train_options(self, batch_size, epochs):
         return TrainOptions(epochs, batch_size, self.train_options.print_every, self._is_gpu(str(self.device)),
-                            self.train_options.optimizer, self.train_options.loss_function)
+                            self.train_options.optimizer, self.train_options.loss_function,
+                            self.train_options.num_runs_per_setting)
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
