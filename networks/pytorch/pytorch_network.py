@@ -12,13 +12,13 @@ from torch.optim import Optimizer
 import networks
 from common.options import TrainOptions
 from networks.network import Network as ANetwork
-from networks.pytorch.fc_model import Network
+from networks.pytorch.fully_connected_model import FullyConnectedModel
 
 
 class PytorchNetwork(ANetwork):
 
     use_deterministic_behavior: bool
-    nw: Network
+    nw: torch.nn.Module
     optimizer: Optimizer
     criterion: _Loss
     validation_criterion: _Loss
@@ -52,7 +52,7 @@ class PytorchNetwork(ANetwork):
         if self.use_deterministic_behavior:
             torch.manual_seed(42)
             torch.cuda.manual_seed_all(42)
-        self.nw = Network(
+        self.nw = FullyConnectedModel(
             network_options.input_layer_size,
             network_options.output_layer_size,
             network_options.hidden_layer_sizes,
@@ -147,8 +147,8 @@ class PytorchNetwork(ANetwork):
     def load(self, path: str) -> networks.network:
         checkpoint = torch.load(path)
         self.nw = PytorchNetwork()
-        self.nw = Network(checkpoint['input_size'], checkpoint['output_size'],
-                          checkpoint['hidden_layer_sizes'], 0)
+        self.nw = FullyConnectedModel(checkpoint['input_size'], checkpoint['output_size'],
+                                      checkpoint['hidden_layer_sizes'], 0)
         if not self.device:  # TODO: fallback, remove
             self.device = self._get_device(True)
         self.nw = self.nw.to(self.device)
