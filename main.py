@@ -18,7 +18,8 @@ def main():
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
-                                 args.loss_function, args.num_runs_per_setting)
+                                 args.activation_function, args.loss_function, args.num_runs_per_setting,
+                                 args.dropout_rate, args.bias)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -47,7 +48,10 @@ def get_parser():
     parser.add_argument('--size_hidden', nargs="+", type=int, default=None)
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--optimizer', action="store", default=None)
+    parser.add_argument('--activation_function', action="store", default="relu")
     parser.add_argument('--loss_function', action="store", default=None)
+    parser.add_argument('--dropout_rate', action="store", type=float, default=0.5)
+    parser.add_argument('--bias', action="store", type=bool, default=True)
     parser.add_argument('--epochs', action="store", type=int, default=None)
     parser.add_argument('--print_every', action="store", type=int, default=64)
     parser.add_argument('--model_file', action="store", default=None)

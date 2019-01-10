@@ -56,7 +56,7 @@ class PytorchNetwork(ANetwork):
             network_options.input_layer_size,
             network_options.output_layer_size,
             network_options.hidden_layer_sizes,
-            0)
+            train_options.dropout_rate, train_options.activation_function, train_options.bias)
         self.criterion = self._get_loss_function(train_options.loss_function)
         self.validation_criterion = nn.MSELoss()
         self.optimizer = self._get_optimizer(train_options.optimizer)
@@ -129,30 +129,30 @@ class PytorchNetwork(ANetwork):
         return self._get_train_options(data_loader.batch_size, max_epochs)
 
     def _get_train_options(self, batch_size, epochs):
-        return TrainOptions(epochs, batch_size, self.train_options.print_every, self._is_gpu(str(self.device)),
-                            self.train_options.optimizer, self.train_options.loss_function,
-                            self.train_options.num_runs_per_setting)
+        return self.train_options._replace(num_epochs=epochs, batch_size=batch_size,
+                                           use_gpu=self._is_gpu(str(self.device)))
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
                       'output_size': self.nw.output.out_features,
                       'hidden_layer_sizes': [each.out_features for each in self.nw.hidden_layers],
                       'optimizer_state': self.optimizer.state_dict(),
-                      'epochs': self.train_options.num_epochs,
+                      'train_options': self.train_options,
                       'state_dict': self.nw.state_dict(),
-                      'optimizer': self.train_options.optimizer,
                       }
         torch.save(checkpoint, path)
 
     def load(self, path: str) -> networks.network:
         checkpoint = torch.load(path)
+        train_options = checkpoint['train_options']
         self.nw = PytorchNetwork()
         self.nw = FullyConnectedModel(checkpoint['input_size'], checkpoint['output_size'],
-                                      checkpoint['hidden_layer_sizes'], 0)
+                                      checkpoint['hidden_layer_sizes'], train_options.dropout_rate,
+                                      train_options.activation_function, train_options.bias)
         if not self.device:  # TODO: fallback, remove
             self.device = self._get_device(True)
         self.nw = self.nw.to(self.device)
-        self.optimizer = self._get_optimizer(checkpoint['optimizer'])
+        self.optimizer = self._get_optimizer(train_options.optimizer)
         self.optimizer.load_state_dict(checkpoint['optimizer_state'])
         self.nw.load_state_dict(checkpoint['state_dict'])
         return self

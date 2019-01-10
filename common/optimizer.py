@@ -29,16 +29,12 @@ class Optimizer:
             # for all optimizers ...
             optimizers = self.optimizers if train_options.optimizer is None else [train_options.optimizer]
             for optimizer in optimizers:
-                options = TrainOptions(train_options.num_epochs, train_options.batch_size, train_options.print_every,
-                                       train_options.use_gpu, optimizer, train_options.loss_function,
-                                       train_options.num_runs_per_setting)
+                options = train_options._replace(optimizer=optimizer)
                 # ... and for all loss functions ...
                 loss_functions = self.loss_functions if train_options.loss_function is None else \
                     [train_options.loss_function]
                 for loss_function in loss_functions:
-                    options = TrainOptions(options.num_epochs, options.batch_size, options.print_every,
-                                           options.use_gpu, options.optimizer, loss_function,
-                                           options.num_runs_per_setting)
+                    options = options._replace(loss_function=loss_function)
                     # ... run x times (try several times because of the random seed)
                     num_runs = train_options.num_runs_per_setting \
                         if train_options.num_runs_per_setting is not None else self.default_num_runs_per_setting

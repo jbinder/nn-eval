@@ -51,7 +51,8 @@ class PyTorchNetworkTest(unittest.TestCase):
         network.save(file_name)
 
         data = self._get_data_linear()
-        train_options = TrainOptions(50, None, 100, True, "SGD", "MSELoss", None)
+        train_options = TrainOptions(num_epochs=50, print_every=100, use_gpu=True, optimizer="SGD",
+                                     loss_function="MSELoss")
         network_options = NetworkOptions(1, 1, [4, 8])
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
@@ -114,7 +115,9 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, num_epochs=500, optimizer="SGD", loss_function="MSELoss"):
-        train_options = TrainOptions(num_epochs, None, 100, True, optimizer, loss_function, None)
+        train_options = TrainOptions(num_epochs=num_epochs, print_every=100, use_gpu=True,
+                                     optimizer=optimizer, loss_function=loss_function, activation_function="relu",
+                                     bias=True, dropout_rate=0.5)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
         network.init(data, network_options, train_options)

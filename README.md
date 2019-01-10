@@ -46,7 +46,10 @@ Arguments:
 -   **size_hidden** \<int\> \<int\> ...: The list of hidden layer sizes to use (optional).
 -   **gpu** \<True/False\>: Set to True to allow using the GPU if available (optional, default: True).
 -   **optimizer** \<str\>: The optimization algorithm to use (optional).
+-   **activation_function** \<str\>: The activation function to use (optional, default: relu).
 -   **loss_function** \<str\>: The loss function to use (optional).
+-   **dropout_rate** \<float>\: The dropout rate to be used for training the network (optional, default: 0.5).
+-   **bias** \<True/False\>: Set to True to use a bias (optional, default: True).
 -   **epochs** \<int\>: The number of epochs to use (optional).
 -   **print_every** \<int\>: The interval in which log messages are shown (optional, default: 64).
 -   **model_file** \<str\>: The path to where to best found model should be stored to (optional).
