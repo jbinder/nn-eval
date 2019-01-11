@@ -24,17 +24,20 @@ class PyTorchNetworkTest(unittest.TestCase):
         self.assertLess(loss, 2)
 
     def test_run_linear_stops_if_done_learning(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(), sys.maxsize)
+        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(),
+                                            TrainOptions(num_epochs=sys.maxsize))
         best = network.train()
         self.assertLess(best.batch_size, sys.maxsize)
 
     def test_run_linear_2_vars(self):
-        network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64], 1500, "Adam")
+        network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64],
+                                            TrainOptions(num_epochs=1500, optimizer="Adam"))
         loss = network.validate()
         self.assertLess(loss, 5)
 
     def test_run_quadratic(self):
-        network = self._get_trained_network(self._get_data_quadratic(), [4096, 4096], 10000, "Adam", "L1Loss")
+        network = self._get_trained_network(self._get_data_quadratic(), [4096, 4096],
+                                            TrainOptions(num_epochs=10000, optimizer="Adam", loss_function="L1Loss"))
         loss = network.validate()
         self.assertLess(loss, 10)
 
@@ -114,10 +117,11 @@ class PyTorchNetworkTest(unittest.TestCase):
         return [4, 8]
 
     @staticmethod
-    def _get_trained_network(data, hidden_layer_sizes, num_epochs=500, optimizer="SGD", loss_function="MSELoss"):
-        train_options = TrainOptions(num_epochs=num_epochs, print_every=100, use_gpu=True,
-                                     optimizer=optimizer, loss_function=loss_function, activation_function="relu",
-                                     bias=True, dropout_rate=0.5)
+    def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):
+        default_train_options = TrainOptions(num_epochs=500, optimizer="SGD", loss_function="MSELoss", print_every=100,
+                                             use_gpu=True, activation_function="relu", bias=True, dropout_rate=0.5)
+        option_dict = {k: v for k, v in train_options._asdict().items() if v is not None}
+        train_options = default_train_options._replace(**option_dict)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
