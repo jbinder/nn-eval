@@ -23,6 +23,16 @@ class PyTorchNetworkTest(unittest.TestCase):
         loss = network.validate()
         self.assertLess(loss, 2)
 
+    def test_run_linear_using_linear_model_predicts_trained_data_accurately(self):
+        data = self._get_data_linear()
+        train_options = TrainOptions(activation_function="none", bias=False)
+        network = self._get_trained_network(data, [], train_options)
+        predicted = network.predict(data['train'][0][0])
+        y = data['train'][1][0]
+        epsilon = 0.0001
+        self.assertLess(abs(predicted - y), epsilon)
+        self.assertLess(abs(network.nw.output.weight.item() - 3), epsilon)
+
     def test_run_linear_stops_if_done_learning(self):
         network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(),
                                             TrainOptions(num_epochs=sys.maxsize))
@@ -121,6 +131,7 @@ class PyTorchNetworkTest(unittest.TestCase):
         default_train_options = TrainOptions(num_epochs=500, optimizer="SGD", loss_function="MSELoss", print_every=100,
                                              use_gpu=True, activation_function="relu", bias=True, dropout_rate=0.5)
         option_dict = {k: v for k, v in train_options._asdict().items() if v is not None}
+        option_dict.update({k: None for k, v in train_options._asdict().items() if v == "none"})
         train_options = default_train_options._replace(**option_dict)
         network_options = NetworkOptions(len(data['train'][0][0]), len(data['train'][1][0]), hidden_layer_sizes)
         network = PytorchNetwork()
