@@ -11,39 +11,40 @@ from networks.pytorch.pytorch_network import PytorchNetwork
 
 class PyTorchNetworkTest(unittest.TestCase):
 
+    epsilon: float
+
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         logging.basicConfig(level=0)
+        self.epsilon = 0.0001
 
     def setUp(self):
         pass
 
     def test_run_linear(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
         loss = network.validate()
-        self.assertLess(loss, 2)
+        self.assertLess(loss, self.epsilon)
 
     def test_run_linear_using_linear_model_predicts_trained_data_accurately(self):
         data = self._get_data_linear()
-        train_options = TrainOptions(activation_function="none", bias=False)
-        network = self._get_trained_network(data, [], train_options)
+        network = self._get_trained_network(data, [], self._get_train_options_linear())
         predicted = network.predict(data['train'][0][0])
         y = data['train'][1][0]
-        epsilon = 0.0001
-        self.assertLess(abs(predicted - y), epsilon)
-        self.assertLess(abs(network.nw.output.weight.item() - 3), epsilon)
+        self.assertLess(abs(predicted - y), self.epsilon)
+        self.assertLess(abs(network.nw.output.weight.item() - 3), self.epsilon)
 
     def test_run_linear_stops_if_done_learning(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear(),
-                                            TrainOptions(num_epochs=sys.maxsize))
+        train_options = self._get_train_options_linear()._replace(num_epochs=sys.maxsize)
+        network = self._get_trained_network(self._get_data_linear(), [], train_options)
         best = network.train()
         self.assertLess(best.batch_size, sys.maxsize)
 
     def test_run_linear_2_vars(self):
-        network = self._get_trained_network(self._get_data_linear_2_vars(), [64, 64],
-                                            TrainOptions(num_epochs=1500, optimizer="Adam"))
+        train_options = self._get_train_options_linear()._replace(num_epochs=10000, optimizer="Adam")
+        network = self._get_trained_network(self._get_data_linear_2_vars(), [], train_options)
         loss = network.validate()
-        self.assertLess(loss, 5)
+        self.assertLess(loss, 0.08)
 
     def test_run_quadratic(self):
         network = self._get_trained_network(self._get_data_quadratic(), [4096, 4096],
@@ -125,6 +126,10 @@ class PyTorchNetworkTest(unittest.TestCase):
     @staticmethod
     def _get_hidden_layer_sizes_linear():
         return [4, 8]
+
+    @staticmethod
+    def _get_train_options_linear():
+        return TrainOptions(activation_function="none", bias=False, seed=42)
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):

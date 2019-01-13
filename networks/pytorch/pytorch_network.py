@@ -30,7 +30,7 @@ class PytorchNetwork(ANetwork):
 
     def __init__(self):
         super().__init__()
-        self.use_deterministic_behavior = False
+        self.use_deterministic_behavior = True
         self.nw = None
         self.optimizer = None
         self.criterion = None
@@ -49,9 +49,7 @@ class PytorchNetwork(ANetwork):
             'valid': self._get_data_loader(data['valid'][0], data['valid'][1], 1),
         }
 
-        if self.use_deterministic_behavior:
-            torch.manual_seed(42)
-            torch.cuda.manual_seed_all(42)
+        self._set_seed(train_options.seed)
         self.nw = FullyConnectedModel(
             network_options.input_layer_size,
             network_options.output_layer_size,
@@ -127,6 +125,12 @@ class PytorchNetwork(ANetwork):
                         logging.info("No more progress, done.")
                         return self._get_train_options(data_loader.batch_size, epoch)
         return self._get_train_options(data_loader.batch_size, max_epochs)
+
+    @staticmethod
+    def _set_seed(seed):
+        if seed is not None:
+            torch.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
 
     def _get_train_options(self, batch_size, epochs):
         return self.train_options._replace(num_epochs=epochs, batch_size=batch_size,
