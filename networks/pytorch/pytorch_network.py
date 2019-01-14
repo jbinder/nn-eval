@@ -30,7 +30,7 @@ class PytorchNetwork(ANetwork):
 
     def __init__(self):
         super().__init__()
-        self.use_deterministic_behavior = True
+        self.use_deterministic_behavior = False
         self.nw = None
         self.optimizer = None
         self.criterion = None
@@ -43,6 +43,9 @@ class PytorchNetwork(ANetwork):
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
+
+        self.use_deterministic_behavior = self.train_options.deterministic \
+            if train_options.deterministic is not None else False
 
         self.data_loaders = {
             'train': self._get_data_loader(data['train'][0], data['train'][1], train_options.batch_size),
@@ -60,10 +63,6 @@ class PytorchNetwork(ANetwork):
         self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
         self.train_options = train_options
-#        seeds = {
-#            'torch': torch.initial_seed(),
-#            'torch.cuda': torch.cuda.initial_seed(),
-#        }
 
     def validate(self) -> float:
         logging.info("Validating...")
@@ -126,15 +125,15 @@ class PytorchNetwork(ANetwork):
                         return self._get_train_options(data_loader.batch_size, epoch)
         return self._get_train_options(data_loader.batch_size, max_epochs)
 
-    @staticmethod
-    def _set_seed(seed):
+    def _set_seed(self, seed):
+        seed = 0 if self.use_deterministic_behavior and seed is None else seed
         if seed is not None:
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
     def _get_train_options(self, batch_size, epochs):
         return self.train_options._replace(num_epochs=epochs, batch_size=batch_size,
-                                           use_gpu=self._is_gpu(str(self.device)))
+                                           use_gpu=self._is_gpu(str(self.device)), seed=torch.initial_seed())
 
     def save(self, path: str) -> None:
         checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
