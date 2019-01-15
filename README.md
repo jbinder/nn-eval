@@ -51,6 +51,8 @@ Arguments:
 -   **dropout_rate** \<float>\: The dropout rate to be used for training the network (optional, default: 0.5).
 -   **bias** \<True/False\>: Set to True to use a bias (optional, default: True).
 -   **epochs** \<int\>: The number of epochs to use (optional).
+-   **seed** \<int\>: Overrides the default random seed with a fixed custom one (optional).
+-   **deterministic** \<True/False\>: Set to True to use a deterministic behavior, i.e. a fixed seed and no shuffling of the training data (optional, default: False).
 -   **print_every** \<int\>: The interval in which log messages are shown (optional, default: 64).
 -   **model_file** \<str\>: The path to where to best found model should be stored to (optional).
 -   **batch_size** \<int\>: The batch size in which training should be performed (optional).

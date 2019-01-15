@@ -44,6 +44,7 @@ class PytorchNetwork(ANetwork):
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
 
+        self.train_options = train_options
         self.use_deterministic_behavior = self.train_options.deterministic \
             if train_options.deterministic is not None else False
 
@@ -62,7 +63,6 @@ class PytorchNetwork(ANetwork):
         self.validation_criterion = nn.MSELoss()
         self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
-        self.train_options = train_options
 
     def validate(self) -> float:
         logging.info("Validating...")
