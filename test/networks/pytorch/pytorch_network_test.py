@@ -53,37 +53,36 @@ class PyTorchNetworkTest(unittest.TestCase):
         self.assertLess(loss, 10)
 
     def test_save(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
         file_name = "tmp.pth"
         network.save(file_name)
         self.assertTrue(os.path.isfile(file_name))
         os.remove(file_name)
 
     def test_load(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
         file_name = "tmp.pth"
         network.save(file_name)
 
         data = self._get_data_linear()
-        train_options = TrainOptions(num_epochs=50, print_every=100, use_gpu=True, optimizer="SGD",
-                                     loss_function="MSELoss")
-        network_options = NetworkOptions(1, 1, [4, 8])
+        train_options = TrainOptions()
+        network_options = NetworkOptions(1, 1, [])
         network = PytorchNetwork()
         network.init(data, network_options, train_options)
 
         network.load(file_name)
-
         loss = network.validate()
-        self.assertLess(loss, 2)
+
         os.remove(file_name)
+        self.assertLess(loss, self.epsilon)
 
     def test_predict(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
         actual = network.predict([2]).item()
-        self.assertAlmostEqual(6, actual, 0)
+        self.assertAlmostEqual(6, actual, 4)
 
     def test_predict_after_load(self):
-        network = self._get_trained_network(self._get_data_linear(), self._get_hidden_layer_sizes_linear())
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
         file_name = "tmp.pth"
         network.save(file_name)
 
@@ -92,8 +91,8 @@ class PyTorchNetworkTest(unittest.TestCase):
 
         actual = network.predict([2.0]).item()
 
-        self.assertAlmostEqual(6, actual, 0)
         os.remove(file_name)
+        self.assertAlmostEqual(6, actual, 4)
 
     @staticmethod
     def _get_data_linear():

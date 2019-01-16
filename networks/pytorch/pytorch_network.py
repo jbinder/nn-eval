@@ -59,9 +59,11 @@ class PytorchNetwork(ANetwork):
             network_options.output_layer_size,
             network_options.hidden_layer_sizes,
             train_options.dropout_rate, train_options.activation_function, train_options.bias)
-        self.criterion = self._get_loss_function(train_options.loss_function)
+        if train_options.loss_function is not None:
+            self.criterion = self._get_loss_function(train_options.loss_function)
         self.validation_criterion = nn.MSELoss()
-        self.optimizer = self._get_optimizer(train_options.optimizer)
+        if train_options.optimizer is not None:
+            self.optimizer = self._get_optimizer(train_options.optimizer)
         self.nw = self.nw.to(self.device)
 
     def validate(self) -> float:
@@ -136,7 +138,9 @@ class PytorchNetwork(ANetwork):
                                            use_gpu=self._is_gpu(str(self.device)), seed=torch.initial_seed())
 
     def save(self, path: str) -> None:
-        checkpoint = {'input_size': self.nw.hidden_layers[0].in_features,
+        input_size = self.nw.hidden_layers[0].in_features if len(self.nw.hidden_layers) > 0 \
+            else self.nw.output.in_features
+        checkpoint = {'input_size': input_size,
                       'output_size': self.nw.output.out_features,
                       'hidden_layer_sizes': [each.out_features for each in self.nw.hidden_layers],
                       'optimizer_state': self.optimizer.state_dict(),
