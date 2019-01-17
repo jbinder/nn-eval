@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 import os
 import sys
 import unittest
@@ -6,6 +7,7 @@ import unittest
 from numpy.ma import arange
 
 from common.options import TrainOptions, NetworkOptions
+from common.visualizer import Visualizer
 from networks.pytorch.pytorch_network import PytorchNetwork
 
 
@@ -48,9 +50,11 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     def test_run_quadratic(self):
         network = self._get_trained_network(self._get_data_quadratic(), [4096, 4096],
-                                            TrainOptions(num_epochs=10000, optimizer="Adam", loss_function="L1Loss"))
+                                            TrainOptions(num_epochs=10000, optimizer="Adam", loss_function="MSELoss",
+                                                         deterministic=True, seed=1073676287))
         loss = network.validate()
-        self.assertLess(loss, 10)
+        self._visualize(network)
+        self.assertLess(loss, 300)
 
     def test_save(self):
         network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
@@ -142,3 +146,11 @@ class PyTorchNetworkTest(unittest.TestCase):
         network.init(data, network_options, train_options)
         network.train()
         return network
+
+    def _visualize(self, network):
+        visualizer = Visualizer()
+        data = self._get_data_quadratic()
+        x = np.concatenate((data['train'][0], data['valid'][0]), 0)
+        y = np.concatenate((data['train'][1], data['valid'][1]), 0)
+        predicted = network.predict(x)
+        visualizer.plot([x for x in range(0, len(x))], y, predicted)
