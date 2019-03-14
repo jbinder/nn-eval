@@ -7,5 +7,9 @@ dependencies:
   - python=3.6
   - numpy
   - pandas
-  - pytorch=0.4.0
   - matplotlib
+  # PyTorch
+  - pytorch=0.4.0
+  # Keras
+  - tensorflow-gpu
+  - keras
