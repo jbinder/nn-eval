@@ -1,4 +1,5 @@
 import logging
+import sys
 import unittest
 
 from common.options import TrainOptions, NetworkOptions
@@ -28,6 +29,12 @@ class KerasNetworkTest(unittest.TestCase):
         predicted = network.predict(data['train'][0][0])
         y = data['train'][1][0]
         self.assertLess(abs(predicted - y), self.epsilon)
+
+    def test_run_linear_stops_if_done_learning(self):
+        train_options = self._get_train_options_linear()._replace(num_epochs=sys.maxsize)
+        network = self._get_trained_network(self._get_data_linear(), [], train_options)
+        best = network.train()
+        self.assertLess(best.num_epochs, sys.maxsize)
 
     @staticmethod
     def _get_data_linear():

@@ -1,12 +1,14 @@
-import numpy
 from typing import Any
 
+import numpy
 from keras import Sequential
+from keras.callbacks import EarlyStopping
 from keras.engine.saving import load_model
 from keras.layers import Dense
 
 import networks
 from common.options import TrainOptions, NetworkOptions
+from networks.keras.callbacks.epoch_count_callback import EpochCountCallback
 from networks.network import Network
 
 
@@ -15,9 +17,12 @@ class KerasNetwork(Network):
     model: Sequential
     data: dict
     train_options: TrainOptions
+    use_deterministic_behavior: bool
+    min_delta: float
 
     def __init__(self):
         self.use_deterministic_behavior = False
+        self.min_delta = 0.0
 
     def init(self, data: dict, network_options: NetworkOptions, train_options: TrainOptions) -> None:
         self.train_options = train_options
@@ -38,11 +43,16 @@ class KerasNetwork(Network):
         self.data = data
 
     def train(self) -> TrainOptions:
-        batch_size = self.train_options.batch_size
         x = numpy.array(self.data['train'][0])
         y = numpy.array(self.data['train'][1])
-        self.model.fit(x, y, batch_size if batch_size is not None else len(x), self.train_options.num_epochs)
-        return self.train_options
+        batch_size = self.train_options.batch_size
+        batch_size = batch_size if batch_size is not None else len(x)
+        early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=1, verbose=0, mode='auto',
+                                       baseline=None, restore_best_weights=False)
+        epoch_counter = EpochCountCallback()
+        self.model.fit(x, y, batch_size, self.train_options.num_epochs, callbacks=[early_stopping, epoch_counter])
+        train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
+        return train_options
 
     def validate(self) -> float:
         result = self.model.evaluate(numpy.array(self.data['valid'][0]), numpy.array(self.data['valid'][1]))
@@ -62,4 +72,3 @@ class KerasNetwork(Network):
         seed = 0 if self.use_deterministic_behavior and seed is None else seed
         if seed is not None:
             numpy.random.seed(0)
-

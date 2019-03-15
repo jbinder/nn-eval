@@ -40,6 +40,7 @@ class PytorchNetwork(ANetwork):
         self.device = None
         self.default_max_epochs = 100000
         self.progress_detection_batch_count = 100
+        self.min_delta = -0.001
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
@@ -118,7 +119,7 @@ class PytorchNetwork(ANetwork):
                     running_loss = 0.0
                 current_batch.append(loss.item())
                 if len(current_batch) >= self.progress_detection_batch_count:
-                    if len(last_batch) < 1 or (min(current_batch) - min(last_batch) < -0.001):
+                    if len(last_batch) < 1 or (min(current_batch) - min(last_batch) < self.min_delta):
                         last_batch.clear()
                         last_batch.extend(current_batch)
                         current_batch.clear()
