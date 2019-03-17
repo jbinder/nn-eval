@@ -36,6 +36,12 @@ class KerasNetworkTest(unittest.TestCase):
         best = network.train()
         self.assertLess(best.num_epochs, sys.maxsize)
 
+    def test_run_linear_2_vars(self):
+        train_options = self._get_train_options_linear()._replace(num_epochs=50000, optimizer="adam")
+        network = self._get_trained_network(self._get_data_linear_2_vars(), [], train_options)
+        loss = network.validate()
+        self.assertLess(loss, 0.08)
+
     @staticmethod
     def _get_data_linear():
         return {
@@ -45,8 +51,21 @@ class KerasNetworkTest(unittest.TestCase):
             'valid': ([[10], [11], [12]], [[30], [33], [36]])}
 
     @staticmethod
+    def _get_data_linear_2_vars():
+        train_x = []
+        for i in range(1, 101, 1):
+            for j in range(101, 1, -1):
+                train_x.append([i, j])
+        train_y = [[i[0] + i[1]] for i in train_x]
+        return {
+            'train': (
+                train_x,
+                train_y),
+            'valid': ([[10, 11], [11, 20], [12, 4]], [[21], [31], [16]])}
+
+    @staticmethod
     def _get_train_options_linear():
-        return TrainOptions(activation_function="none", bias=False, seed=42, deterministic=True)
+        return TrainOptions(activation_function="linear", bias=False, seed=42, deterministic=False)
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):

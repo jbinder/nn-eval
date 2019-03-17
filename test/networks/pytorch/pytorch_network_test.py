@@ -108,7 +108,7 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_data_linear_2_vars():
-        train_x = [[i, i+1] for i in range(1, 101, 1)]
+        train_x = [[i, i+1] for i in range(1, 101, 1)]  # TODO: this is quite an unbalanced input, see KerasNetworkTest::test_run_linear_2_vars
         train_y = [[i[0] + i[1]] for i in train_x]
         return {
             'train': (

@@ -40,6 +40,7 @@ class KerasNetwork(Network):
             self.model.add(Dense(network_options.output_layer_size, input_dim=network_options.input_layer_size,
                                  activation=train_options.activation_function))
         self.model.compile(loss=train_options.loss_function, optimizer=train_options.optimizer, metrics=['accuracy'])
+        self.model.optimizer.lr = 0.001
         self.data = data
 
     def train(self) -> TrainOptions:
@@ -47,7 +48,7 @@ class KerasNetwork(Network):
         y = numpy.array(self.data['train'][1])
         batch_size = self.train_options.batch_size
         batch_size = batch_size if batch_size is not None else len(x)
-        early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=1, verbose=0, mode='auto',
+        early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=2, verbose=0, mode='auto',
                                        baseline=None, restore_best_weights=False)
         epoch_counter = EpochCountCallback()
         self.model.fit(x, y, batch_size, self.train_options.num_epochs, callbacks=[early_stopping, epoch_counter])
