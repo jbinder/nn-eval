@@ -36,6 +36,7 @@ class KerasNetwork(Network):
                                  activation=train_options.activation_function))
             for layer in hidden_layers[1:]:
                 self.model.add(Dense(layer, activation=train_options.activation_function))
+            self.model.add(Dense(network_options.output_layer_size, activation=train_options.activation_function))
         else:
             self.model.add(Dense(network_options.output_layer_size, input_dim=network_options.input_layer_size,
                                  activation=train_options.activation_function))
