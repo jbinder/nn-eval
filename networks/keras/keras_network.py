@@ -1,5 +1,6 @@
 from typing import Any
 
+import keras
 import numpy
 from keras import Sequential
 from keras.callbacks import EarlyStopping
@@ -13,16 +14,17 @@ from networks.network import Network
 
 
 class KerasNetwork(Network):
-
     model: Sequential
     data: dict
     train_options: TrainOptions
     use_deterministic_behavior: bool
     min_delta: float
+    learning_rate: float
 
     def __init__(self):
         self.use_deterministic_behavior = False
         self.min_delta = 0.0
+        self.learning_rate = 0.001
 
     def init(self, data: dict, network_options: NetworkOptions, train_options: TrainOptions) -> None:
         self.train_options = train_options
@@ -40,8 +42,9 @@ class KerasNetwork(Network):
         else:
             self.model.add(Dense(network_options.output_layer_size, input_dim=network_options.input_layer_size,
                                  activation=train_options.activation_function))
-        self.model.compile(loss=train_options.loss_function, optimizer=train_options.optimizer, metrics=['accuracy'])
-        self.model.optimizer.lr = 0.001
+        if train_options.optimizer is not None:
+            optimizer = self._get_optimizer(train_options.optimizer)
+            self.model.compile(loss=train_options.loss_function, optimizer=optimizer, metrics=['accuracy'])
         self.data = data
 
     def train(self) -> TrainOptions:
@@ -64,13 +67,16 @@ class KerasNetwork(Network):
         return self.model.predict(numpy.array(data))[0][0]
 
     def save(self, path: str) -> None:
-        self.model.save(str)
+        self.model.save(path)
 
     def load(self, path: str) -> networks.network:
-        self.model = load_model(str)
+        self.model = load_model(path)
         return self
 
     def _set_seed(self, seed):
         seed = 0 if self.use_deterministic_behavior and seed is None else seed
         if seed is not None:
             numpy.random.seed(0)
+
+    def _get_optimizer(self, optimizer: str):
+        return getattr(keras.optimizers, optimizer)(lr=self.learning_rate)

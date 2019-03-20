@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import unittest
 
@@ -41,6 +42,30 @@ class KerasNetworkTest(unittest.TestCase):
         network = self._get_trained_network(self._get_data_linear_2_vars(), [], train_options)
         loss = network.validate()
         self.assertLess(loss, 0.08)
+
+    def test_save(self):
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
+        file_name = "tmp.pth"
+        network.save(file_name)
+        self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+
+    def test_load(self):
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
+        file_name = "tmp.pth"
+        network.save(file_name)
+
+        data = self._get_data_linear()
+        train_options = TrainOptions()
+        network_options = NetworkOptions(1, 1, [])
+        network = KerasNetwork()
+        network.init(data, network_options, train_options)
+
+        network.load(file_name)
+        loss = network.validate()
+
+        os.remove(file_name)
+        self.assertLess(loss, self.epsilon)
 
     @staticmethod
     def _get_data_linear():

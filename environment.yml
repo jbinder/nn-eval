@@ -13,3 +13,4 @@ dependencies:
   # Keras
   - tensorflow-gpu
   - keras
+  - hdf5
