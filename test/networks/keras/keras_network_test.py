@@ -67,6 +67,24 @@ class KerasNetworkTest(unittest.TestCase):
         os.remove(file_name)
         self.assertLess(loss, self.epsilon)
 
+    def test_predict(self):
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
+        actual = network.predict([2]).item()
+        self.assertAlmostEqual(6, actual, 3)
+
+    def test_predict_after_load(self):
+        network = self._get_trained_network(self._get_data_linear(), [], self._get_train_options_linear())
+        file_name = "tmp.pth"
+        network.save(file_name)
+
+        network = KerasNetwork()
+        network.load(file_name)
+
+        actual = network.predict([2.0]).item()
+
+        os.remove(file_name)
+        self.assertAlmostEqual(6, actual, 3)
+
     @staticmethod
     def _get_data_linear():
         return {
