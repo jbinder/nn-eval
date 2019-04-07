@@ -5,7 +5,7 @@ import numpy
 from keras import Sequential
 from keras.callbacks import EarlyStopping
 from keras.engine.saving import load_model
-from keras.layers import Dense
+from keras.layers import Dense, K
 
 import networks
 from common.options import TrainOptions, NetworkOptions
@@ -52,8 +52,10 @@ class KerasNetwork(Network):
         y = numpy.array(self.data['train'][1])
         batch_size = self.train_options.batch_size
         batch_size = batch_size if batch_size is not None else len(x)
-        early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=2, verbose=0, mode='auto',
-                                       baseline=None, restore_best_weights=False)
+        patience = self.train_options.progress_detection_patience \
+            if self.train_options.progress_detection_patience else 2
+        early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=patience, verbose=0,
+                                       mode='auto', baseline=None, restore_best_weights=True)
         epoch_counter = EpochCountCallback()
         self.model.fit(x, y, batch_size, self.train_options.num_epochs, callbacks=[early_stopping, epoch_counter])
         train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
@@ -78,5 +80,9 @@ class KerasNetwork(Network):
         if seed is not None:
             numpy.random.seed(0)
 
-    def _get_optimizer(self, optimizer: str):
-        return getattr(keras.optimizers, optimizer)(lr=self.learning_rate)
+    def _get_optimizer(self, optimizer_name: str):
+        optimizer = getattr(keras.optimizers, optimizer_name)(lr=self.learning_rate)
+        if optimizer_name == "sgd":
+            optimizer.nesterov = True
+            optimizer.momentum = K.variable(1, name='momentum')
+        return optimizer
