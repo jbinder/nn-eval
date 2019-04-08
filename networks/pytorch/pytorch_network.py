@@ -55,6 +55,8 @@ class PytorchNetwork(ANetwork):
         }
 
         self._set_seed(train_options.seed)
+        self.progress_detection_batch_count = train_options.progress_detection_patience \
+            if train_options.progress_detection_patience else self.progress_detection_batch_count
         self.nw = FullyConnectedModel(
             network_options.input_layer_size,
             network_options.output_layer_size,
