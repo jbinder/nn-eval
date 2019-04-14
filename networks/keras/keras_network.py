@@ -20,11 +20,13 @@ class KerasNetwork(Network):
     use_deterministic_behavior: bool
     min_delta: float
     learning_rate: float
+    default_max_epochs: int
 
     def __init__(self):
         self.use_deterministic_behavior = False
         self.min_delta = 0.0
         self.learning_rate = 0.001
+        self.default_max_epochs = 100000
 
     def init(self, data: dict, network_options: NetworkOptions, train_options: TrainOptions) -> None:
         self.train_options = train_options
@@ -57,7 +59,9 @@ class KerasNetwork(Network):
         early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=patience, verbose=0,
                                        mode='auto', baseline=None, restore_best_weights=True)
         epoch_counter = EpochCountCallback()
-        self.model.fit(x, y, batch_size, self.train_options.num_epochs, callbacks=[early_stopping, epoch_counter])
+        max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
+            else self.default_max_epochs
+        self.model.fit(x, y, batch_size, max_epochs, callbacks=[early_stopping, epoch_counter])
         train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
         return train_options
 
@@ -66,7 +70,7 @@ class KerasNetwork(Network):
         return result[0]
 
     def predict(self, data) -> Any:
-        return self.model.predict(numpy.array(data))[0][0]
+        return self.model.predict(numpy.array(data))
 
     def save(self, path: str) -> None:
         self.model.save(path)

@@ -6,6 +6,7 @@ from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
 from common.visualizer import Visualizer
+from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
 
 
@@ -25,12 +26,17 @@ def main():
     num_features_out = data['train'][1].shape[1]
     network_options = NetworkOptions(num_features_in, num_features_out, args.size_hidden)
 
-    network = PytorchNetwork()
+    networks = []
+    if args.networks is None or "pytorch" in args.networks:
+        networks.append(PytorchNetwork())
+    if args.networks is None or "keras" in args.networks:
+        networks.append(KerasNetwork())
     optimizer = Optimizer()
-    result = optimizer.run(network, data, network_options, train_options, OptimizerOptions(args.model_file))
+    result = optimizer.run(networks, data, network_options, train_options, OptimizerOptions(args.model_file))
     logging.info(f"Minimum loss: {result['loss']} (details: {result})")
 
     if args.visualize:
+        network = next((x for x in networks if x.__class__.__name__ == result['network']), None)
         visualizer = Visualizer()
         x = np.concatenate((data['train'][0], data['valid'][0]), 0)
         y = np.concatenate((data['train'][1], data['valid'][1]), 0)
@@ -60,6 +66,7 @@ def get_parser():
     parser.add_argument('--deterministic', action="store", type=bool, default=False)
     parser.add_argument('--num_runs_per_setting', action="store", type=int, default=10)
     parser.add_argument('--visualize', action="store", type=bool, default=True)
+    parser.add_argument('--networks', nargs="+", action="store", default=None)
     return parser
 
 
