@@ -19,7 +19,7 @@ class Optimizer:
         self.loss_functions = ["mse"]  # TODO: "PyTorch: CrossEntropyLoss, L1Loss",
         self.loss_functions_map = {
             "KerasNetwork": {"mse": "mean_squared_error"},
-            "PyTorchNetwork": {"mse": "MSELoss"},
+            "PytorchNetwork": {"mse": "MSELoss"},
         }
         self.optimizers = ["SGD", "Adam"]
         self.hidden_layers = [[8], [64], [512], [2048], [8, 8], [64, 64], [512, 512], [2048, 2048]]

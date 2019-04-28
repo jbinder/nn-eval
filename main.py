@@ -41,7 +41,12 @@ def main():
         x = np.concatenate((data['train'][0], data['valid'][0]), 0)
         y = np.concatenate((data['train'][1], data['valid'][1]), 0)
         predicted = network.predict(x)
-        visualizer.plot(x, y, predicted)
+        if y.shape[1] != 1 or predicted.shape[1] != 1:
+            raise Exception('Only one-dimensional output variables are currently supported.')
+        x_num = [i for i in range(x.shape[0])]
+        y_array = [y[0] for y in y]
+        predicted_array = [p[0] for p in predicted]
+        visualizer.plot(x_num, y_array, predicted_array)
 
 
 def get_parser():
