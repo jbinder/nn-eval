@@ -21,7 +21,11 @@ class Optimizer:
             "KerasNetwork": {"mse": "mean_squared_error"},
             "PytorchNetwork": {"mse": "MSELoss"},
         }
-        self.optimizers = ["SGD", "Adam"]
+        self.optimizers = ["SGD", "adam"]
+        self.optimizers_map = {
+            "KerasNetwork": {"adam": "adam"},
+            "PytorchNetwork": {"adam": "Adam"},
+        }
         self.hidden_layers = [[8], [64], [512], [2048], [8, 8], [64, 64], [512, 512], [2048, 2048]]
 
     def run(self, networks: List[Network], data: dict, network_options: NetworkOptions, train_options: TrainOptions,
@@ -38,6 +42,7 @@ class Optimizer:
                 # for all optimizers ...
                 optimizers = self.optimizers if train_options.optimizer is None else [train_options.optimizer]
                 for optimizer in optimizers:
+                    optimizer = self.optimizers_map[network.__class__.__name__][optimizer]
                     options = train_options._replace(optimizer=optimizer)
                     # ... and for all loss functions ...
                     loss_functions = self.loss_functions if train_options.loss_function is None else \
