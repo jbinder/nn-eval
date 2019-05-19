@@ -1,5 +1,6 @@
 import argparse
 import logging
+import numpy as np
 
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
@@ -38,8 +39,10 @@ def main():
     if args.visualize:
         network = next((x for x in networks if x.__class__.__name__ == result['network']), None)
         visualizer = Visualizer()
-        x = data['valid'][0]  # np.concatenate((data['train'][0], data['valid'][0]), 0)
-        y = data['valid'][1]  # np.concatenate((data['train'][1], data['valid'][1]), 0)
+        x = data['valid'][0] if not args.visualize_include_test_data \
+            else np.concatenate((data['train'][0], data['valid'][0]), 0)
+        y = data['valid'][1] if not args.visualize_include_test_data \
+            else np.concatenate((data['train'][1], data['valid'][1]), 0)
         predicted = network.predict(x)
         if y.shape[1] != 1 or predicted.shape[1] != 1:
             raise Exception('Only one-dimensional output variables are currently supported.')
@@ -73,6 +76,7 @@ def get_parser():
     parser.add_argument('--num_runs_per_setting', action="store", type=int, default=10)
     parser.add_argument('--visualize', action="store", type=bool, default=True)
     parser.add_argument('--visualize_limit', action="store", type=int, default=None)
+    parser.add_argument('--visualize_include_test_data', action="store", type=bool, default=False)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
     parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
     return parser
