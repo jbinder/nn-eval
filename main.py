@@ -20,7 +20,8 @@ def main():
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.activation_function, args.loss_function, args.num_runs_per_setting,
-                                 args.dropout_rate, args.bias, args.seed, args.deterministic)
+                                 args.dropout_rate, args.bias, args.seed, args.deterministic,
+                                 args.progress_detection_patience)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -72,6 +73,7 @@ def get_parser():
     parser.add_argument('--num_runs_per_setting', action="store", type=int, default=10)
     parser.add_argument('--visualize', action="store", type=bool, default=True)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
+    parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
     return parser
 
 
