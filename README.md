@@ -5,7 +5,7 @@ Evaluates different neural network libraries on simple datasets.
 
 For unspecified training and network options it will try to determine the best values.
 
-Currently only PyTorch is supported.
+Currently PyTorch and Keras are supported.
 
 
 Requirements
@@ -58,6 +58,9 @@ Arguments:
 -   **batch_size** \<int\>: The batch size in which training should be performed (optional).
 -   **num_runs_per_setting** \<int\>: To consider the random seed some libraries provide, run multiple times with the same settings (optional, default: 10).
 -   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True).
+-   **visualize_limit** \<int\>: See visualize, limit the plot to the specified number of values (optional).
+-   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
+-   **progress_detection_patience** \<int\>: The number of epochs with little loss improvement until stopping to lear (optional, default: 1000).
 
 Example:
 
