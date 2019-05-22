@@ -5,6 +5,7 @@ import numpy as np
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
+from common.reciprocal_normalizer import ReciprocalNormalizer
 from common.visualizer import Visualizer
 from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
@@ -17,6 +18,10 @@ def main():
 
     data_provider = CsvDataProvider()
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
+
+    normalizer = ReciprocalNormalizer()
+    data['train'] = (normalizer.process(data['train'][0]), normalizer.process(data['train'][1]))
+    data['valid'] = (normalizer.process(data['valid'][0]), normalizer.process(data['valid'][1]))
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.activation_function, args.loss_function, args.num_runs_per_setting,
