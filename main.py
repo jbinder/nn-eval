@@ -20,8 +20,8 @@ def main():
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
 
     normalizer = ReciprocalNormalizer()
-    data['train'] = (normalizer.process(data['train'][0]), normalizer.process(data['train'][1]))
-    data['valid'] = (normalizer.process(data['valid'][0]), normalizer.process(data['valid'][1]))
+    normalized_data = {'train': (normalizer.normalize(data['train'][0]), normalizer.normalize(data['train'][1])),
+                       'valid': (normalizer.normalize(data['valid'][0]), normalizer.normalize(data['valid'][1]))}
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.activation_function, args.loss_function, args.num_runs_per_setting,
@@ -38,7 +38,7 @@ def main():
     if args.networks is None or "keras" in args.networks:
         networks.append(KerasNetwork())
     optimizer = Optimizer()
-    result = optimizer.run(networks, data, network_options, train_options, OptimizerOptions(args.model_file))
+    result = optimizer.run(networks, normalized_data, network_options, train_options, OptimizerOptions(args.model_file))
     logging.info(f"Minimum loss: {result['loss']} (details: {result})")
 
     if args.visualize:
@@ -48,7 +48,7 @@ def main():
             else np.concatenate((data['train'][0], data['valid'][0]), 0)
         y = data['valid'][1] if not args.visualize_include_test_data \
             else np.concatenate((data['train'][1], data['valid'][1]), 0)
-        predicted = network.predict(x)
+        predicted = normalizer.denormalize(network.predict(normalizer.normalize(x)))
         if y.shape[1] != 1 or predicted.shape[1] != 1:
             raise Exception('Only one-dimensional output variables are currently supported.')
         x_num = [i for i in range(x.shape[0])]
