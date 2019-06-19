@@ -1,11 +1,11 @@
 import argparse
+import importlib
 import logging
 import numpy as np
 
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
-from common.reciprocal_normalizer import ReciprocalNormalizer
 from common.visualizer import Visualizer
 from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
@@ -19,7 +19,7 @@ def main():
     data_provider = CsvDataProvider()
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
 
-    normalizer = ReciprocalNormalizer()
+    normalizer = get_normalizer(args.normalizer)
     normalized_data = {'train': (normalizer.normalize(data['train'][0]), normalizer.normalize(data['train'][1])),
                        'valid': (normalizer.normalize(data['valid'][0]), normalizer.normalize(data['valid'][1]))}
 
@@ -58,6 +58,15 @@ def main():
         visualizer.plot(x_num[:visualize_limit], y_array[:visualize_limit], predicted_array[:visualize_limit])
 
 
+def get_normalizer(normalizer):
+    try:
+        module = importlib.import_module("common." + normalizer.lower() + "_normalizer")
+        normalizer = getattr(module, normalizer + "Normalizer")()
+        return normalizer
+    except ModuleNotFoundError:
+        raise Exception(f"Normalizer not supported: {normalizer}")
+
+
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Tries finding the best training and network options for a specified dataset.',
@@ -84,6 +93,7 @@ def get_parser():
     parser.add_argument('--visualize_include_test_data', action="store", type=bool, default=False)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
     parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
+    parser.add_argument('--normalizer', action="store", default="Reciprocal")
     return parser
 
 
