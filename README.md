@@ -61,7 +61,7 @@ Arguments:
 -   **visualize_limit** \<int\>: See visualize, limit the plot to the specified number of values (optional).
 -   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
 -   **progress_detection_patience** \<int\>: The number of epochs with little loss improvement until stopping to lear (optional, default: 1000).
--   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently only the reciprocal normalizer is available (optional, default: Reciprocal).
+-   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently only the reciprocal and identity normalizers are available (optional, default: Identity).
 
 Example:
 

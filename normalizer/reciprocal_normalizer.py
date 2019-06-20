@@ -1,18 +1,20 @@
 import numpy as np
 
+from normalizer.normalizer_base import NormalizerBase
 
-class ReciprocalNormalizer:
+
+class ReciprocalNormalizer(NormalizerBase):
     """ Normalizes values in a numpy array using the reciprocal value. """
 
     @staticmethod
     def normalize(data):
-        if type(data) is not np.ndarray:
-            raise ValueError("data needs to be a numpy array.")
+        data = NormalizerBase.normalize(data)
         return ReciprocalNormalizer._calculate_reciprocal(data)
 
     @staticmethod
     def denormalize(data):
-        return ReciprocalNormalizer.normalize(data)
+        data = NormalizerBase.denormalize(data)
+        return ReciprocalNormalizer._calculate_reciprocal(data)
 
     @staticmethod
     def _calculate_reciprocal(data):

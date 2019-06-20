@@ -60,7 +60,7 @@ def main():
 
 def get_normalizer(normalizer):
     try:
-        module = importlib.import_module("common." + normalizer.lower() + "_normalizer")
+        module = importlib.import_module("normalizer." + normalizer.lower() + "_normalizer")
         normalizer = getattr(module, normalizer + "Normalizer")()
         return normalizer
     except ModuleNotFoundError:
@@ -93,7 +93,7 @@ def get_parser():
     parser.add_argument('--visualize_include_test_data', action="store", type=bool, default=False)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
     parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
-    parser.add_argument('--normalizer', action="store", default="Reciprocal")
+    parser.add_argument('--normalizer', action="store", default="Identity")
     return parser
 
 

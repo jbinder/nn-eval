@@ -2,7 +2,7 @@ import numpy
 import numpy as np
 import unittest
 
-from common.reciprocal_normalizer import ReciprocalNormalizer
+from normalizer.reciprocal_normalizer import ReciprocalNormalizer
 
 
 # noinspection PyMethodMayBeStatic
