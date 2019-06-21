@@ -44,6 +44,7 @@ class PytorchNetwork(ANetwork):
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
+        logging.info(f"Using device: {self.device}")
 
         self.train_options = train_options
         self.use_deterministic_behavior = self.train_options.deterministic \

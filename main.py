@@ -1,6 +1,9 @@
 import argparse
 import importlib
 import logging
+import time
+from datetime import timedelta
+
 import numpy as np
 
 from common.csv_data_provider import CsvDataProvider
@@ -12,8 +15,12 @@ from networks.pytorch.pytorch_network import PytorchNetwork
 
 
 def main():
-    logging.basicConfig(level=0)
-
+    logging.basicConfig(
+        level=0,
+        format='%(asctime)s %(levelname)s %(module)s:%(funcName)s: %(message)s',
+    )
+    logging.info("Starting...")
+    start = time.time()
     args = get_parser().parse_args()
 
     data_provider = CsvDataProvider()
@@ -39,7 +46,8 @@ def main():
         networks.append(KerasNetwork())
     optimizer = Optimizer()
     result = optimizer.run(networks, normalized_data, network_options, train_options, OptimizerOptions(args.model_file))
-    logging.info(f"Minimum loss: {result['loss']} (details: {result})")
+    elapsed = (time.time() - start)
+    logging.info(f"Done: min.loss={result['loss']} time={timedelta(seconds=elapsed)} (details={result})")
 
     if args.visualize:
         network = next((x for x in networks if x.__class__.__name__ == result['network']), None)

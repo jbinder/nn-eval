@@ -1,6 +1,8 @@
 import array
 import logging
+import time
 from typing import List
+from datetime import timedelta
 
 from common.options import NetworkOptions, TrainOptions, OptimizerOptions
 from networks.network import Network
@@ -59,16 +61,19 @@ class Optimizer:
 
     @staticmethod
     def _run_once(best, train_options, data, i, network, network_options, optimizer_options):
-        logging.info(f"Run #{i}: {train_options}, {network_options}...")
+        logging.info(f"Run #{i} begin: {train_options}, {network_options}...")
+        start = time.time()
         network.init(data, network_options, train_options)
         actual_train_options = network.train()
         loss = network.validate()
-        logging.info(f"Loss: {loss}")
+        elapsed = (time.time() - start)
+        logging.info(f"Run #{i} end: loss={loss}, time={timedelta(seconds=elapsed)}")
         if best['loss'] is None or loss < best['loss']:
             logging.info("New best run!")
             best['loss'] = loss
             best['train_options'] = actual_train_options
             best['network_options'] = network_options
             best['network'] = network.__class__.__name__
+            best['time'] = elapsed
             if optimizer_options.save_path is not None:
                 network.save(optimizer_options.save_path)
