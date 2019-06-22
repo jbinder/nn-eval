@@ -60,7 +60,8 @@ Arguments:
 -   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True).
 -   **visualize_limit** \<int\>: See visualize, limit the plot to the specified number of values (optional).
 -   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
--   **progress_detection_patience** \<int\>: The number of epochs with little loss improvement until stopping to lear (optional, default: 1000).
+-   **progress_detection_patience** \<int\>: The number of epochs with little (see progress_detection_min_delta) loss improvement until stopping early (optional, default: 1000).
+-   **progress_detection_min_delta** \<float>\: The minimum loss improvement compared to the previous epoch to avoid early stopping (see progress_detection_patience) (optional, default 0).
 -   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently only the reciprocal and identity normalizers are available (optional, default: Identity).
 
 Example:

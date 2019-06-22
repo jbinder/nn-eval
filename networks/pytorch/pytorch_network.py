@@ -40,7 +40,7 @@ class PytorchNetwork(ANetwork):
         self.device = None
         self.default_max_epochs = 100000
         self.progress_detection_batch_count = 100
-        self.min_delta = -0.001
+        self.progress_detection_min_delta = -0.001
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
@@ -57,7 +57,9 @@ class PytorchNetwork(ANetwork):
 
         self._set_seed(train_options.seed)
         self.progress_detection_batch_count = train_options.progress_detection_patience \
-            if train_options.progress_detection_patience else self.progress_detection_batch_count
+            if train_options.progress_detection_patience is not None else self.progress_detection_batch_count
+        self.progress_detection_min_delta = train_options.progress_detection_min_delta \
+            if train_options.progress_detection_min_delta is not None else self.progress_detection_min_delta
         self.nw = FullyConnectedModel(
             network_options.input_layer_size,
             network_options.output_layer_size,
@@ -122,7 +124,8 @@ class PytorchNetwork(ANetwork):
                     running_loss = 0.0
                 current_batch.append(loss.item())
                 if len(current_batch) >= self.progress_detection_batch_count:
-                    if len(last_batch) < 1 or (min(current_batch) - min(last_batch) < self.min_delta):
+                    last_delta = min(current_batch) - min(last_batch) if len(last_batch) > 0 else 0
+                    if len(last_batch) < 1 or (last_delta < self.progress_detection_min_delta):
                         last_batch.clear()
                         last_batch.extend(current_batch)
                         current_batch.clear()

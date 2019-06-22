@@ -33,7 +33,7 @@ def main():
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.activation_function, args.loss_function, args.num_runs_per_setting,
                                  args.dropout_rate, args.bias, args.seed, args.deterministic,
-                                 args.progress_detection_patience)
+                                 args.progress_detection_patience, args.progress_detection_min_delta)
 
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
@@ -101,6 +101,7 @@ def get_parser():
     parser.add_argument('--visualize_include_test_data', action="store", type=bool, default=False)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
     parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
+    parser.add_argument('--progress_detection_min_delta', action="store", type=float, default=0)
     parser.add_argument('--normalizer', action="store", default="Identity")
     return parser
 
