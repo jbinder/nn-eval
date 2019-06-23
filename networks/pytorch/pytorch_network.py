@@ -119,12 +119,13 @@ class PytorchNetwork(ANetwork):
                     info = "Epoch: {}/{}.. ".format(epoch, max_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
                                 ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
-                           "\nTraining Loss: {:.3f}.. ".format(running_loss / self.train_options.print_every)
+                           "\nTraining Loss: {:.10f}.. ".format(running_loss / self.train_options.print_every)
                     logging.info(info)
                     running_loss = 0.0
                 current_batch.append(loss.item())
                 if len(current_batch) >= self.progress_detection_batch_count:
                     last_delta = min(current_batch) - min(last_batch) if len(last_batch) > 0 else 0
+                    logging.info(f"Progress detection delta: {last_delta}")
                     if len(last_batch) < 1 or (last_delta < self.progress_detection_min_delta):
                         last_batch.clear()
                         last_batch.extend(current_batch)
