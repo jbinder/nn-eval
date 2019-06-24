@@ -26,7 +26,7 @@ class PytorchNetwork(ANetwork):
     data_loaders: array
     device: torch.device
     default_max_epochs: int
-    progress_detection_batch_count: int
+    progress_detection_epoch_count: int
 
     def __init__(self):
         super().__init__()
@@ -39,8 +39,8 @@ class PytorchNetwork(ANetwork):
         self.data_loaders = None
         self.device = None
         self.default_max_epochs = 100000
-        self.progress_detection_batch_count = 100
-        self.progress_detection_min_delta = -0.001
+        self.progress_detection_epoch_count = 100
+        self.progress_detection_min_delta = 0.0
 
     def init(self, data, network_options, train_options):
         self.device = self._get_device(train_options.use_gpu)
@@ -56,8 +56,8 @@ class PytorchNetwork(ANetwork):
         }
 
         self._set_seed(train_options.seed)
-        self.progress_detection_batch_count = train_options.progress_detection_patience \
-            if train_options.progress_detection_patience is not None else self.progress_detection_batch_count
+        self.progress_detection_epoch_count = train_options.progress_detection_patience \
+            if train_options.progress_detection_patience is not None else self.progress_detection_epoch_count
         self.progress_detection_min_delta = train_options.progress_detection_min_delta \
             if train_options.progress_detection_min_delta is not None else self.progress_detection_min_delta
         self.nw = FullyConnectedModel(
@@ -101,10 +101,13 @@ class PytorchNetwork(ANetwork):
         data_loader = self.data_loaders['train']
         max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
             else self.default_max_epochs
-        last_batch = []
-        current_batch = []
+        last_losses = []
+        current_losses = []
+        current_losses_num_epochs = 1
         for epoch in range(1, max_epochs):
             running_loss = 0.0
+            current_epoch_loss = 0.0
+            current_epoch_batch_idx = 0
             for batch_idx, (data, target) in enumerate(data_loader):
                 data = data.to(self.device)
                 target = target.to(self.device)
@@ -115,24 +118,31 @@ class PytorchNetwork(ANetwork):
                 # noinspection PyArgumentList
                 self.optimizer.step()
                 running_loss += loss.item()
+                current_epoch_loss += loss.item()
+                current_epoch_batch_idx += 1
                 if batch_idx % self.train_options.print_every == 0:
                     info = "Epoch: {}/{}.. ".format(epoch, max_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
                                 ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
-                           "\nTraining Loss: {:.10f}.. ".format(running_loss / self.train_options.print_every)
+                           "\nTraining Loss: {:.10f}.. ".format(running_loss / (batch_idx + 1))
                     logging.info(info)
                     running_loss = 0.0
-                current_batch.append(loss.item())
-                if len(current_batch) >= self.progress_detection_batch_count:
-                    last_delta = min(current_batch) - min(last_batch) if len(last_batch) > 0 else 0
-                    logging.info(f"Progress detection delta: {last_delta}")
-                    if len(last_batch) < 1 or (last_delta < self.progress_detection_min_delta):
-                        last_batch.clear()
-                        last_batch.extend(current_batch)
-                        current_batch.clear()
+                if current_losses_num_epochs > self.progress_detection_epoch_count:
+                    current_min = min(current_losses)
+                    last_min = min(last_losses) if len(last_losses) > 0 else None
+                    last_delta = last_min - current_min if len(last_losses) > 0 else 0
+                    logging.info(f"Progress detection: delta={last_delta}, current min={current_min}, "
+                                 f"last min={last_min}")
+                    if len(last_losses) < 1 or (last_delta > self.progress_detection_min_delta):
+                        last_losses.clear()
+                        last_losses.extend(current_losses)
+                        current_losses.clear()
+                        current_losses_num_epochs = 1
                     else:
                         logging.info("No more progress, done.")
                         return self._get_train_options(data_loader.batch_size, epoch)
+            current_losses.append(current_epoch_loss / current_epoch_batch_idx)
+            current_losses_num_epochs = current_losses_num_epochs + 1
         return self._get_train_options(data_loader.batch_size, max_epochs)
 
     def _set_seed(self, seed):
