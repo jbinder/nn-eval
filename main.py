@@ -100,7 +100,7 @@ def get_parser():
     parser.add_argument('--visualize_limit', action="store", type=int, default=None)
     parser.add_argument('--visualize_include_test_data', action="store", type=bool, default=False)
     parser.add_argument('--networks', nargs="+", action="store", default=None)
-    parser.add_argument('--progress_detection_patience', action="store", type=int, default=1000)
+    parser.add_argument('--progress_detection_patience', action="store", type=int, default=None)
     parser.add_argument('--progress_detection_min_delta', action="store", type=float, default=0)
     parser.add_argument('--normalizer', action="store", default="Identity")
     return parser

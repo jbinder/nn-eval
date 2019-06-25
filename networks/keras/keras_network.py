@@ -54,13 +54,13 @@ class KerasNetwork(Network):
         y = numpy.array(self.data['train'][1])
         batch_size = self.train_options.batch_size
         batch_size = batch_size if batch_size is not None else len(x)
+        max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
+            else self.default_max_epochs
         patience = self.train_options.progress_detection_patience \
-            if self.train_options.progress_detection_patience else 2
+            if self.train_options.progress_detection_patience else max_epochs
         early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=patience, verbose=0,
                                        mode='auto', baseline=None, restore_best_weights=True)
         epoch_counter = EpochCountCallback()
-        max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
-            else self.default_max_epochs
         self.model.fit(x, y, batch_size, max_epochs, callbacks=[early_stopping, epoch_counter])
         train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
         return train_options

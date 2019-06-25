@@ -25,6 +25,7 @@ class PytorchNetwork(ANetwork):
     train_options: TrainOptions
     data_loaders: array
     device: torch.device
+    max_epochs: int
     default_max_epochs: int
     progress_detection_epoch_count: int
 
@@ -56,8 +57,10 @@ class PytorchNetwork(ANetwork):
         }
 
         self._set_seed(train_options.seed)
+        self.max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
+            else self.default_max_epochs
         self.progress_detection_epoch_count = train_options.progress_detection_patience \
-            if train_options.progress_detection_patience is not None else self.progress_detection_epoch_count
+            if train_options.progress_detection_patience is not None else self.max_epochs
         self.progress_detection_min_delta = train_options.progress_detection_min_delta \
             if train_options.progress_detection_min_delta is not None else self.progress_detection_min_delta
         self.nw = FullyConnectedModel(
@@ -99,12 +102,10 @@ class PytorchNetwork(ANetwork):
     def train(self) -> TrainOptions:
         self.nw.train()
         data_loader = self.data_loaders['train']
-        max_epochs = self.train_options.num_epochs if self.train_options.num_epochs is not None \
-            else self.default_max_epochs
         last_losses = []
         current_losses = []
         current_losses_num_epochs = 1
-        for epoch in range(1, max_epochs):
+        for epoch in range(1, self.max_epochs):
             running_loss = 0.0
             current_epoch_loss = 0.0
             current_epoch_batch_idx = 0
@@ -121,7 +122,7 @@ class PytorchNetwork(ANetwork):
                 current_epoch_loss += loss.item()
                 current_epoch_batch_idx += 1
                 if batch_idx % self.train_options.print_every == 0:
-                    info = "Epoch: {}/{}.. ".format(epoch, max_epochs) + \
+                    info = "Epoch: {}/{}.. ".format(epoch, self.max_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
                                 ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
                            "\nTraining Loss: {:.10f}.. ".format(running_loss / (batch_idx + 1))
@@ -143,7 +144,7 @@ class PytorchNetwork(ANetwork):
                         return self._get_train_options(data_loader.batch_size, epoch)
             current_losses.append(current_epoch_loss / current_epoch_batch_idx)
             current_losses_num_epochs = current_losses_num_epochs + 1
-        return self._get_train_options(data_loader.batch_size, max_epochs)
+        return self._get_train_options(data_loader.batch_size, self.max_epochs)
 
     def _set_seed(self, seed):
         seed = 0 if self.use_deterministic_behavior and seed is None else seed

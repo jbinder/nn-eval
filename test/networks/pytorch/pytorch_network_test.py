@@ -132,7 +132,8 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_train_options_linear():
-        return TrainOptions(activation_function="none", bias=False, seed=42, deterministic=True)
+        return TrainOptions(activation_function="none", bias=False, seed=42, deterministic=True,
+                            progress_detection_patience=100)
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):
