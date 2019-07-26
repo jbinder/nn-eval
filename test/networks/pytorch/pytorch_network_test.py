@@ -12,7 +12,6 @@ from networks.pytorch.pytorch_network import PytorchNetwork
 
 
 class PyTorchNetworkTest(unittest.TestCase):
-
     epsilon: float
 
     def __init__(self, *args, **kwargs):
@@ -108,7 +107,8 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_data_linear_2_vars():
-        train_x = [[i, i+1] for i in range(1, 101, 1)]  # TODO: this is quite an unbalanced input, see KerasNetworkTest::test_run_linear_2_vars
+        # TODO: this is quite an unbalanced input, see KerasNetworkTest::test_run_linear_2_vars
+        train_x = [[i, i + 1] for i in range(1, 101, 1)]
         train_y = [[i[0] + i[1]] for i in train_x]
         return {
             'train': (
@@ -137,8 +137,9 @@ class PyTorchNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):
-        default_train_options = TrainOptions(num_epochs=500, optimizer="SGD", loss_function="MSELoss", print_every=100,
-                                             use_gpu=True, activation_function="relu", bias=True, dropout_rate=0.5)
+        default_train_options = TrainOptions(num_epochs=500, optimizer="SGD", learning_rate=0.001,
+                                             loss_function="MSELoss", print_every=100, use_gpu=True,
+                                             activation_function="relu", bias=True, dropout_rate=0.5)
         option_dict = {k: v for k, v in train_options._asdict().items() if v is not None}
         option_dict.update({k: None for k, v in train_options._asdict().items() if v == "none"})
         train_options = default_train_options._replace(**option_dict)

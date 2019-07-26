@@ -19,13 +19,11 @@ class KerasNetwork(Network):
     train_options: TrainOptions
     use_deterministic_behavior: bool
     min_delta: float
-    learning_rate: float
     default_max_epochs: int
 
     def __init__(self):
         self.use_deterministic_behavior = False
         self.min_delta = 0.0
-        self.learning_rate = 0.001
         self.default_max_epochs = 100000
 
     def init(self, data: dict, network_options: NetworkOptions, train_options: TrainOptions) -> None:
@@ -45,7 +43,7 @@ class KerasNetwork(Network):
             self.model.add(Dense(network_options.output_layer_size, input_dim=network_options.input_layer_size,
                                  activation=train_options.activation_function))
         if train_options.optimizer is not None:
-            optimizer = self._get_optimizer(train_options.optimizer)
+            optimizer = self._get_optimizer(train_options.optimizer, train_options.learning_rate)
             self.model.compile(loss=train_options.loss_function, optimizer=optimizer, metrics=['accuracy'])
         self.data = data
 
@@ -84,8 +82,8 @@ class KerasNetwork(Network):
         if seed is not None:
             numpy.random.seed(0)
 
-    def _get_optimizer(self, optimizer_name: str):
-        optimizer = getattr(keras.optimizers, optimizer_name)(lr=self.learning_rate)
+    def _get_optimizer(self, optimizer_name: str, learning_rate: float):
+        optimizer = getattr(keras.optimizers, optimizer_name)(lr=learning_rate)
         if optimizer_name == "sgd":
             optimizer.nesterov = True
             optimizer.momentum = K.variable(1, name='momentum')

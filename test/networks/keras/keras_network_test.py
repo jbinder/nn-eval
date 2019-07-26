@@ -11,7 +11,6 @@ from networks.keras.keras_network import KerasNetwork
 
 
 class KerasNetworkTest(unittest.TestCase):
-
     epsilon: float
 
     def __init__(self, *args, **kwargs):
@@ -133,8 +132,9 @@ class KerasNetworkTest(unittest.TestCase):
 
     @staticmethod
     def _get_trained_network(data, hidden_layer_sizes, train_options=TrainOptions()):
-        default_train_options = TrainOptions(num_epochs=20000, optimizer="adam", loss_function="mse", print_every=100,
-                                             use_gpu=True, activation_function="linear", bias=True, dropout_rate=0.5)
+        default_train_options = TrainOptions(num_epochs=20000, optimizer="adam", learning_rate=0.001,
+                                             loss_function="mse", print_every=100, use_gpu=True,
+                                             activation_function="linear", bias=True, dropout_rate=0.5)
         option_dict = {k: v for k, v in train_options._asdict().items() if v is not None}
         option_dict.update({k: None for k, v in train_options._asdict().items() if v == "none"})
         train_options = default_train_options._replace(**option_dict)

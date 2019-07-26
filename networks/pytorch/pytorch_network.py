@@ -72,7 +72,7 @@ class PytorchNetwork(ANetwork):
             self.criterion = self._get_loss_function(train_options.loss_function)
         self.validation_criterion = nn.MSELoss()
         if train_options.optimizer is not None:
-            self.optimizer = self._get_optimizer(train_options.optimizer)
+            self.optimizer = self._get_optimizer(train_options.optimizer, train_options.learning_rate)
         self.nw = self.nw.to(self.device)
 
     def validate(self) -> float:
@@ -178,7 +178,7 @@ class PytorchNetwork(ANetwork):
         if not self.device:  # TODO: fallback, remove
             self.device = self._get_device(True)
         self.nw = self.nw.to(self.device)
-        self.optimizer = self._get_optimizer(train_options.optimizer)
+        self.optimizer = self._get_optimizer(train_options.optimizer, train_options.learning_rate)
         self.optimizer.load_state_dict(checkpoint['optimizer_state'])
         self.nw.load_state_dict(checkpoint['state_dict'])
         return self
@@ -199,8 +199,8 @@ class PytorchNetwork(ANetwork):
         return utils_data.DataLoader(training_samples, batch_size=batch_size,
                                      shuffle=not self.use_deterministic_behavior)
 
-    def _get_optimizer(self, optimizer):
-        return getattr(optim, optimizer)(self.nw.parameters(), lr=0.001)  # TODO: set momentum for SGD?
+    def _get_optimizer(self, optimizer: str, learning_rate: float):
+        return getattr(optim, optimizer)(self.nw.parameters(), lr=learning_rate)  # TODO: set momentum for SGD?
 
     @staticmethod
     def _get_loss_function(loss_function):

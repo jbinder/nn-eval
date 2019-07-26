@@ -31,8 +31,8 @@ def main():
                        'valid': (normalizer.normalize(data['valid'][0]), normalizer.normalize(data['valid'][1]))}
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
-                                 args.activation_function, args.loss_function, args.num_runs_per_setting,
-                                 args.dropout_rate, args.bias, args.seed, args.deterministic,
+                                 args.learning_rate, args.activation_function, args.loss_function,
+                                 args.num_runs_per_setting, args.dropout_rate, args.bias, args.seed, args.deterministic,
                                  args.progress_detection_patience, args.progress_detection_min_delta)
 
     num_features_in = data['train'][0].shape[1]
@@ -85,6 +85,7 @@ def get_parser():
     parser.add_argument('--size_hidden', nargs="+", type=int, default=None)
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--optimizer', action="store", default=None)
+    parser.add_argument('--learning_rate', action="store", default=0.001)
     parser.add_argument('--activation_function', action="store", default="relu")
     parser.add_argument('--loss_function', action="store", default=None)
     parser.add_argument('--dropout_rate', action="store", type=float, default=0.5)
