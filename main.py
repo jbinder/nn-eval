@@ -85,7 +85,7 @@ def get_parser():
     parser.add_argument('--size_hidden', nargs="+", type=int, default=None)
     parser.add_argument('--gpu', action="store", type=bool, default=True)
     parser.add_argument('--optimizer', action="store", default=None)
-    parser.add_argument('--learning_rate', action="store", default=0.001)
+    parser.add_argument('--learning_rate', action="store", type=float, default=0.001)
     parser.add_argument('--activation_function', action="store", default="relu")
     parser.add_argument('--loss_function', action="store", default=None)
     parser.add_argument('--dropout_rate', action="store", type=float, default=0.5)
