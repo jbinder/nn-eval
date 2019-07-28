@@ -64,7 +64,9 @@ class KerasNetwork(Network):
         return train_options
 
     def validate(self) -> float:
-        result = self.model.evaluate(numpy.array(self.data['valid'][0]), numpy.array(self.data['valid'][1]))
+        x = self.data['valid'][0] if len(self.data['valid'][0]) > 0 else self.data['train'][0]
+        y = self.data['valid'][1] if len(self.data['valid'][1]) > 0 else self.data['train'][1]
+        result = self.model.evaluate(numpy.array(x), numpy.array(y))
         return result[0]
 
     def predict(self, data) -> Any:

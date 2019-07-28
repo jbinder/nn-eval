@@ -78,12 +78,13 @@ class PytorchNetwork(ANetwork):
     def validate(self) -> float:
         logging.info("Validating...")
         loss = 0
-        for batch_idx, (data, target) in enumerate(self.data_loaders['valid']):
+        data_loader = self.data_loaders['valid'] if len(self.data_loaders['valid']) > 0 else self.data_loaders['train']
+        for batch_idx, (data, target) in enumerate(data_loader):
             target = target.to(self.device)
             actual = self._forward(data)
             current_loss = self.validation_criterion(actual, target).item()
             loss += current_loss
-            logging.info(f"input: {data.numpy()}, expected: {target.item()}, actual: {actual.cpu().numpy()},"
+            logging.info(f"input: {data.numpy()}, expected: {target.cpu().numpy()}, actual: {actual.cpu().numpy()},"
                          f"loss: {current_loss}")
         logging.info(f"total loss: {loss}")
         return loss
