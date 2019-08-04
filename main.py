@@ -9,6 +9,7 @@ import numpy as np
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
+from common.tools import convert_to_snake_case
 from common.visualizer import Visualizer
 from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
@@ -26,9 +27,9 @@ def main():
     data_provider = CsvDataProvider()
     data = data_provider.get_data_from_file(args.x, args.y, args.data_train_percentage)
 
-    normalizer = get_normalizer(args.normalizer)
-    normalized_data = {'train': (normalizer.normalize(data['train'][0]), normalizer.normalize(data['train'][1])),
-                       'valid': (normalizer.normalize(data['valid'][0]), normalizer.normalize(data['valid'][1]))}
+    normalizer = get_normalizer(args.normalizer, np.concatenate((data['train'][0], data['valid'][0]), 0))
+    normalized_data = {'train': (normalizer.normalize(data['train'][0]), data['train'][1]),
+                       'valid': (normalizer.normalize(data['valid'][0]), data['valid'][1])}
 
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.learning_rate, args.activation_function, args.loss_function,
@@ -56,7 +57,7 @@ def main():
             else np.concatenate((data['train'][0], data['valid'][0]), 0)
         y = data['valid'][1] if not args.visualize_include_test_data \
             else np.concatenate((data['train'][1], data['valid'][1]), 0)
-        predicted = normalizer.denormalize(network.predict(normalizer.normalize(x)))
+        predicted = network.predict(normalizer.normalize(x))
         if y.shape[1] != 1 or predicted.shape[1] != 1:
             raise Exception('Only one-dimensional output variables are currently supported.')
         x_num = [i for i in range(x.shape[0])]
@@ -66,10 +67,14 @@ def main():
         visualizer.plot(x_num[:visualize_limit], y_array[:visualize_limit], predicted_array[:visualize_limit])
 
 
-def get_normalizer(normalizer):
+def get_normalizer(normalizer, data):
     try:
-        module = importlib.import_module("normalizer." + normalizer.lower() + "_normalizer")
-        normalizer = getattr(module, normalizer + "Normalizer")()
+        file_name = convert_to_snake_case(normalizer)
+        module = importlib.import_module("normalizer." + file_name + "_normalizer")
+        if normalizer == "SklearnStandard":
+            normalizer = getattr(module, normalizer + "Normalizer")(data)
+        else:
+            normalizer = getattr(module, normalizer + "Normalizer")()
         return normalizer
     except ModuleNotFoundError:
         raise Exception(f"Normalizer not supported: {normalizer}")

@@ -6,13 +6,11 @@ from normalizer.normalizer_base import NormalizerBase
 class ReciprocalNormalizer(NormalizerBase):
     """ Normalizes values in a numpy array using the reciprocal value. """
 
-    @staticmethod
-    def normalize(data):
+    def normalize(self, data):
         data = NormalizerBase.normalize(data)
         return ReciprocalNormalizer._calculate_reciprocal(data)
 
-    @staticmethod
-    def denormalize(data):
+    def denormalize(self, data):
         data = NormalizerBase.denormalize(data)
         return ReciprocalNormalizer._calculate_reciprocal(data)
 

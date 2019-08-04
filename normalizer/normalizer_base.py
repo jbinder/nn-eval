@@ -5,15 +5,13 @@ import numpy as np
 
 class NormalizerBase(ABC):
 
-    @staticmethod
     @abstractmethod
-    def normalize(data):
+    def normalize(self, data):
         NormalizerBase._assert_is_numpy_array(data)
         return data
 
-    @staticmethod
     @abstractmethod
-    def denormalize(data):
+    def denormalize(self, data):
         NormalizerBase._assert_is_numpy_array(data)
         return data
 

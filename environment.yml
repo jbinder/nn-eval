@@ -14,3 +14,5 @@ dependencies:
   - tensorflow-gpu
   - keras
   - hdf5
+  # scikit-learn
+  - scikit-learn=0.21
