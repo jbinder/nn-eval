@@ -2,12 +2,14 @@ import logging
 import os
 import sys
 import unittest
+import numpy as np
 from random import shuffle
 
 from numpy.ma import arange
 
 from common.options import TrainOptions, NetworkOptions
 from networks.keras.keras_network import KerasNetwork
+from normalizer.sklearn_standard_normalizer import SklearnStandardNormalizer
 
 
 class KerasNetworkTest(unittest.TestCase):
@@ -47,8 +49,9 @@ class KerasNetworkTest(unittest.TestCase):
 
     def test_run_quadratic(self):
         options = TrainOptions(num_epochs=50000, optimizer="sgd", loss_function="mse", activation_function="sigmoid",
-                               deterministic=True, seed=1073676287, batch_size=None, progress_detection_patience=25000)
-        network = self._get_trained_network(self._get_data_quadratic(), [100], options)
+                               deterministic=True, seed=1073676287, batch_size=None, progress_detection_patience=10000,
+                               bias=False, dropout_rate=0)
+        network = self._get_trained_network(self._get_data_quadratic(), [10], options)
         loss = network.validate()
         self.assertLess(loss, 300)
 
@@ -120,9 +123,11 @@ class KerasNetworkTest(unittest.TestCase):
         train_x = [[i] for i in arange(0.0, 1.0, 0.0001)]  # 101
         shuffle(train_x)
         train_y = [[i[0] * i[0]] for i in train_x]
+        train_x = np.array(train_x)
+        normalizer = SklearnStandardNormalizer(train_x)
         return {
             'train': (
-                train_x,
+                normalizer.normalize(train_x),
                 train_y),
             'valid': ([[3.3], [0.2], [0.23]], [[10.89], [0.04], [0.0529]])}
 

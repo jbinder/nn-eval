@@ -62,7 +62,7 @@ Arguments:
 -   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
 -   **progress_detection_patience** \<int/None\>: The number of epochs with little (see progress_detection_min_delta) loss improvement until stopping early. Set to None to disable early stopping (optional, default: None).
 -   **progress_detection_min_delta** \<float>\: The minimum loss improvement compared to the previous epoch to avoid early stopping (see progress_detection_patience) (optional, default 0).
--   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently only the reciprocal and identity normalizers are available (optional, default: Identity).
+-   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently the Reciprocal, SklearnStandard, and Identity normalizers are available (optional, default: Identity).
 
 Example:
 
