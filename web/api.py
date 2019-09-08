@@ -44,4 +44,4 @@ def init():
 init()
 
 if __name__ == '__main__':
-    app.run(host=config['ip'], port=config['port'])
+    app.run(host=config['ip'], port=config['port'] if config['port'] > 0 else None)
