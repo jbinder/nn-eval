@@ -18,7 +18,6 @@ class SklearnStandardNormalizer(NormalizerBase):
         return self._unprepare_data(self._scaler.transform(self._prepare_data(data, ndim)), ndim)
 
     def denormalize(self, data):
-        # TODO: cache input? (original data needed for fitting, different datasets cannot use the same fit)
         if len(data) <= 0:
             return data
         ndim = data.ndim

@@ -13,6 +13,7 @@ from common.tools import convert_to_snake_case
 from common.visualizer import Visualizer
 from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
+from normalizer.tools import get_normalizer
 
 
 def main():
@@ -65,19 +66,6 @@ def main():
         predicted_array = [p[0] for p in predicted]
         visualize_limit = x.shape[0] if args.visualize_limit is None else args.visualize_limit
         visualizer.plot(x_num[:visualize_limit], y_array[:visualize_limit], predicted_array[:visualize_limit])
-
-
-def get_normalizer(normalizer, data):
-    try:
-        file_name = convert_to_snake_case(normalizer)
-        module = importlib.import_module("normalizer." + file_name + "_normalizer")
-        if normalizer == "SklearnStandard":
-            normalizer = getattr(module, normalizer + "Normalizer")(data)
-        else:
-            normalizer = getattr(module, normalizer + "Normalizer")()
-        return normalizer
-    except ModuleNotFoundError:
-        raise Exception(f"Normalizer not supported: {normalizer}")
 
 
 def get_parser():
