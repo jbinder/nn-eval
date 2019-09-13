@@ -1,5 +1,4 @@
 import argparse
-import importlib
 import logging
 import time
 from datetime import timedelta
@@ -9,7 +8,6 @@ import numpy as np
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
 from common.options import TrainOptions, NetworkOptions, OptimizerOptions
-from common.tools import convert_to_snake_case
 from common.visualizer import Visualizer
 from networks.keras.keras_network import KerasNetwork
 from networks.pytorch.pytorch_network import PytorchNetwork
@@ -18,7 +16,7 @@ from normalizer.tools import get_normalizer
 
 def main():
     logging.basicConfig(
-        level=0,
+        level=logging.NOTSET,
         format='%(asctime)s %(levelname)s %(module)s:%(funcName)s: %(message)s',
     )
     logging.info("Starting...")
