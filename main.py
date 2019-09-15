@@ -99,4 +99,7 @@ def get_parser():
 
 
 if __name__ == "__main__":
+    # fix logger collision, see https://github.com/tensorflow/tensorflow/issues/26691
+    import absl.logging
+    logging.root.removeHandler(absl.logging._absl_handler)
     main()
