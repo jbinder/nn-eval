@@ -19,8 +19,8 @@ app.config["DEBUG"] = True
 def home():
     global network, normalizer
     content = request.json
-    data = content['input']
-    data = normalizer.normalize(np.array(data).reshape(1, -1))[0]
+    data = [content['input']]
+    data = normalizer.normalize(np.array(data))[0]
     result = network.predict(data)
     return jsonify({'result': result.tolist()})
 

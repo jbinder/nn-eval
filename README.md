@@ -54,15 +54,18 @@ Arguments:
 -   **seed** \<int\>: Overrides the default random seed with a fixed custom one (optional).
 -   **deterministic** \<True/False\>: Set to True to use a deterministic behavior, i.e. a fixed seed and no shuffling of the training data (optional, default: False).
 -   **print_every** \<int\>: The interval in which log messages are shown (optional, default: 64).
--   **model_file** \<str\>: The path to where to best found model should be stored to (optional).
+-   **model_file** \<str\>: The path to where to best found model should be stored to (train mode, optional), or which model to load (predict mode).
 -   **batch_size** \<int\>: The batch size in which training should be performed (optional).
 -   **num_runs_per_setting** \<int\>: To consider the random seed some libraries provide, run multiple times with the same settings (optional, default: 10).
 -   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True).
 -   **visualize_limit** \<int\>: See visualize, limit the plot to the specified number of values (optional).
 -   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
+-   **network** \<pytorch/keras>: If set, specifies the network to use, if unspecified tries all available networks.
 -   **progress_detection_patience** \<int/None\>: The number of epochs with little (see progress_detection_min_delta) loss improvement until stopping early. Set to None to disable early stopping (optional, default: None).
 -   **progress_detection_min_delta** \<float>\: The minimum loss improvement compared to the previous epoch to avoid early stopping (see progress_detection_patience) (optional, default 0).
 -   **normalizer** \<str\>: The normalizer to use for normalizing the data. Currently the Reciprocal, SklearnStandard, and Identity normalizers are available (optional, default: Identity).
+-   **mode** \<train/predict\>: Set to 'predict' for prediction from an existing model, or 'train' to train a model (optional, default: train).
+    The prediction mode requires a network to be specified, as well as normalizer settings. For the SklearnStandard normalizer, also the x and y files that have been used to train the model need to be specified.
 
 Example:
 
