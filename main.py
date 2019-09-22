@@ -1,9 +1,11 @@
 import argparse
 import logging
+import os
 import time
 from datetime import timedelta
 
 import numpy as np
+import pandas as pd
 
 from common.csv_data_provider import CsvDataProvider
 from common.optimizer import Optimizer
@@ -36,10 +38,10 @@ def main():
         logging.info(f"Done: min.loss={result['loss']} time={timedelta(seconds=elapsed)} (details={result})")
 
     if args.visualize or args.mode == "predict":
-        predict(args, data, networks, normalizer, result)
+        predict(args, data, networks, normalizer, result, args.x_predict)
 
 
-def predict(args, data, networks, normalizer, result):
+def predict(args, data, networks, normalizer, result, x_predict):
     if args.mode == "predict":
         if len(networks) > 1:
             raise Exception('In predict mode one single network needs to be set.')
@@ -47,10 +49,15 @@ def predict(args, data, networks, normalizer, result):
         network.load(args.model_file)
     else:
         network = next((x for x in networks if x.__class__.__name__ == result['network']), None)
-    x = data['valid'][0] if not args.visualize_include_test_data \
-        else np.concatenate((data['train'][0], data['valid'][0]), 0)
-    y = data['valid'][1] if not args.visualize_include_test_data \
-        else np.concatenate((data['train'][1], data['valid'][1]), 0)
+    if x_predict is None:
+        x = data['valid'][0] if not args.visualize_include_test_data \
+            else np.concatenate((data['train'][0], data['valid'][0]), 0)
+        y = data['valid'][1] if not args.visualize_include_test_data \
+            else np.concatenate((data['train'][1], data['valid'][1]), 0)
+    else:
+        base_dir = os.getcwd()
+        x = pd.read_csv(os.path.join(base_dir, x_predict))
+        y = np.array([[0] for i in range(0, x.shape[0])])
     predicted = network.predict(normalizer.normalize(x))
     if y.shape[1] != 1 or predicted.shape[1] != 1:
         raise Exception('Only one-dimensional output variables are currently supported.')
@@ -117,6 +124,7 @@ def get_parser():
     parser.add_argument('--progress_detection_min_delta', action="store", type=float, default=0)
     parser.add_argument('--normalizer', action="store", default="Identity")
     parser.add_argument('--mode', action="store", default="train")
+    parser.add_argument('--x_predict', action="store", default="x_predict.csv")
     return parser
 
 
