@@ -67,6 +67,7 @@ Arguments:
 -   **mode** \<train/predict\>: Set to 'predict' for prediction from an existing model, or 'train' to train a model (optional, default: train).
     The prediction mode requires a network to be specified, as well as normalizer settings, and x_predict. For the SklearnStandard normalizer, also the x and y files that have been used to train the model need to be specified.
 -   **x_predict** \<str>\: The path to the CSV file which contains input which should be predicted (optional, default: x_predict.csv).
+-   **y_predict** \<str>\: The path to the CSV file which contains the output used for visualizing predictions (optional).
 
 Example:
 

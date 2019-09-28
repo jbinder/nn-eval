@@ -38,10 +38,10 @@ def main():
         logging.info(f"Done: min.loss={result['loss']} time={timedelta(seconds=elapsed)} (details={result})")
 
     if args.visualize or args.mode == "predict":
-        predict(args, data, networks, normalizer, result, args.x_predict)
+        predict(args, data, networks, normalizer, result, args.x_predict, args.y_predict)
 
 
-def predict(args, data, networks, normalizer, result, x_predict):
+def predict(args, data, networks, normalizer, result, x_predict, y_predict):
     if args.mode == "predict":
         if len(networks) > 1:
             raise Exception('In predict mode one single network needs to be set.')
@@ -57,7 +57,10 @@ def predict(args, data, networks, normalizer, result, x_predict):
     else:
         base_dir = os.getcwd()
         x = pd.read_csv(os.path.join(base_dir, x_predict))
-        y = np.array([[0] for i in range(0, x.shape[0])])
+        if y_predict is not None:
+            y = pd.read_csv(os.path.join(base_dir, y_predict)).values
+        else:
+            y = np.array([[0] for i in range(0, x.shape[0])])
     predicted = network.predict(normalizer.normalize(x))
     if y.shape[1] != 1 or predicted.shape[1] != 1:
         raise Exception('Only one-dimensional output variables are currently supported.')
@@ -125,6 +128,7 @@ def get_parser():
     parser.add_argument('--normalizer', action="store", default="Identity")
     parser.add_argument('--mode', action="store", default="train")
     parser.add_argument('--x_predict', action="store", default="x_predict.csv")
+    parser.add_argument('--y_predict', action="store", default=None)
     return parser
 
 
