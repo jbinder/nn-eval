@@ -127,7 +127,7 @@ def get_parser():
     parser.add_argument('--progress_detection_min_delta', action="store", type=float, default=0)
     parser.add_argument('--normalizer', action="store", default="Identity")
     parser.add_argument('--mode', action="store", default="train")
-    parser.add_argument('--x_predict', action="store", default="x_predict.csv")
+    parser.add_argument('--x_predict', action="store", default=None)
     parser.add_argument('--y_predict', action="store", default=None)
     return parser
 
