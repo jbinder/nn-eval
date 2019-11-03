@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<body>
+    <h1>General prediction client</h1>
+    <span>Enter the features coma-separated in the field below and click submit.</span>
+    <br/><br/>
+    <form action="predict" method="post">
+        <input type="text" name="input" />
+        <input type="submit" title="Submit" />
+    </form>
+    <br/><br/>
+    Last result:
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          {{ message }}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+</body>
+</html>
