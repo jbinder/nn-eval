@@ -16,7 +16,6 @@ from networks.pytorch.fully_connected_model import FullyConnectedModel
 
 
 class PytorchNetwork(ANetwork):
-
     use_deterministic_behavior: bool
     nw: torch.nn.Module
     optimizer: Optimizer
@@ -125,7 +124,7 @@ class PytorchNetwork(ANetwork):
                 if batch_idx % self.train_options.print_every == 0:
                     info = "Epoch: {}/{}.. ".format(epoch, self.max_epochs) + \
                            "\nProgress~: {:.2f}.. ".format(
-                                ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
+                               ((1 + batch_idx) * len(data)) / (len(data_loader) * len(data)) * 100) + \
                            "\nTraining Loss: {:.10f}.. ".format(running_loss / (batch_idx + 1))
                     logging.info(info)
                     running_loss = 0.0
@@ -170,7 +169,11 @@ class PytorchNetwork(ANetwork):
         torch.save(checkpoint, path)
 
     def load(self, path: str) -> networks.network:
-        checkpoint = torch.load(path)
+        if torch.cuda.is_available():
+            map_location = lambda storage, loc: storage.cuda()
+        else:
+            map_location = 'cpu'
+        checkpoint = torch.load(path, map_location=map_location)
         train_options = checkpoint['train_options']
         self.nw = PytorchNetwork()
         self.nw = FullyConnectedModel(checkpoint['input_size'], checkpoint['output_size'],
