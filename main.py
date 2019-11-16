@@ -56,7 +56,7 @@ def predict(args, data, networks, normalizer, result, x_predict, y_predict):
             else np.concatenate((data['train'][1], data['valid'][1]), 0)
     else:
         base_dir = os.getcwd()
-        x = pd.read_csv(os.path.join(base_dir, x_predict))
+        x = pd.read_csv(os.path.join(base_dir, x_predict)).values
         if y_predict is not None:
             y = pd.read_csv(os.path.join(base_dir, y_predict)).values
         else:
