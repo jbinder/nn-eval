@@ -1,14 +1,15 @@
 import numpy
-import numpy as np
-import unittest
+
 from normalizer.sklearn_standard_normalizer import SklearnStandardNormalizer
-
-
 # noinspection PyMethodMayBeStatic
-class SklearnStandardScalerNormalizerTest(unittest.TestCase):
+from test.unit_tests.normalizer.normalizer_test_base import NormalizerTestBase
+
+
+class SklearnStandardScalerNormalizerTest(NormalizerTestBase):
+
     def test_normalize_valid_data(self):
-        data = np.array([0, 0.5, 0.75, 1, 0, 11])
-        source = np.array([0, 0.5, 0.75, 1, 0, 11])
+        data = self.source.copy()
+        source = self.source.copy()
         normalizer = SklearnStandardNormalizer(data)
         actual = normalizer.normalize(data)
         [self.assertNotAlmostEqual(actual[i], source[i]) for i in range(0, len(source))]
@@ -20,7 +21,7 @@ class SklearnStandardScalerNormalizerTest(unittest.TestCase):
         self.assertRaises(Exception, SklearnStandardNormalizer, data)
 
     def test_denormalize_valid_data(self):
-        data = np.array([0, 0.5, 0.75, 1, 11])
+        data = self.source.copy()
         normalizer = SklearnStandardNormalizer(data)
         normalized = normalizer.normalize(data)
         actual = normalizer.denormalize(normalized)
@@ -29,4 +30,3 @@ class SklearnStandardScalerNormalizerTest(unittest.TestCase):
     def test_denormalize_invalid_data(self):
         data = [0]
         self.assertRaises(Exception, SklearnStandardNormalizer, data)
-

@@ -23,10 +23,10 @@ class Optimizer:
             "KerasNetwork": {"mse": "mean_squared_error"},
             "PytorchNetwork": {"mse": "MSELoss"},
         }
-        self.optimizers = ["SGD", "adam"]
+        self.optimizers = ["sgd", "adam"]
         self.optimizers_map = {
             "KerasNetwork": {"adam": "adam"},
-            "PytorchNetwork": {"adam": "Adam"},
+            "PytorchNetwork": {"adam": "Adam", "sgd": "SGD"},
         }
         self.hidden_layers = [[8], [64], [512], [2048], [8, 8], [64, 64], [512, 512], [2048, 2048]]
 

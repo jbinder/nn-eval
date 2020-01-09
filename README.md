@@ -81,3 +81,5 @@ Development
 To update the environment after changed dependencies, run:
 
         conda env update
+
+For testing, use [nosetests](https://nose.readthedocs.io/en/latest/).

@@ -7,11 +7,11 @@ class ReciprocalNormalizer(NormalizerBase):
     """ Normalizes values in a numpy array using the reciprocal value. """
 
     def normalize(self, data):
-        data = NormalizerBase.normalize(data)
+        data = NormalizerBase.normalize(self, data)
         return ReciprocalNormalizer._calculate_reciprocal(data)
 
     def denormalize(self, data):
-        data = NormalizerBase.denormalize(data)
+        data = NormalizerBase.denormalize(self, data)
         return ReciprocalNormalizer._calculate_reciprocal(data)
 
     @staticmethod

@@ -204,6 +204,10 @@ class PytorchNetwork(ANetwork):
                                      shuffle=not self.use_deterministic_behavior)
 
     def _get_optimizer(self, optimizer: str, learning_rate: float):
+        if optimizer == "SGD" and learning_rate is None:
+            learning_rate = 0.1  # there needs to be a default for lr in SGD (PyTorch)
+        if learning_rate is None:
+            return getattr(optim, optimizer)(self.nw.parameters())
         return getattr(optim, optimizer)(self.nw.parameters(), lr=learning_rate)  # TODO: set momentum for SGD?
 
     @staticmethod
