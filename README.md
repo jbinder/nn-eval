@@ -57,7 +57,7 @@ Arguments:
 -   **model_file** \<str\>: The path to where to best found model should be stored to (train mode, optional), or which model to load (predict mode).
 -   **batch_size** \<int\>: The batch size in which training should be performed (optional).
 -   **num_runs_per_setting** \<int\>: To consider the random seed some libraries provide, run multiple times with the same settings (optional, default: 10).
--   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True).
+-   **visualize** \<True/False\>: Set to True to show a plot of expected vs predicted values (optional, default: True). If set, logs for TensorBoard are written to logs/fit if supported by the network.
 -   **visualize_limit** \<int\>: See visualize, limit the plot to the specified number of values (optional).
 -   **visualize_include_test_data** \<True/False\>: See visualize, set to True if not only validation but also test data should be shown (optional, default: False).
 -   **network** \<pytorch/keras>: If set, specifies the network to use, if unspecified tries all available networks.

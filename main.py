@@ -79,7 +79,7 @@ def train(args, data, normalizer, networks):
     train_options = TrainOptions(args.epochs, args.batch_size, args.print_every, args.gpu, args.optimizer,
                                  args.learning_rate, args.activation_function, args.loss_function,
                                  args.num_runs_per_setting, args.dropout_rate, args.bias, args.seed, args.deterministic,
-                                 args.progress_detection_patience, args.progress_detection_min_delta)
+                                 args.progress_detection_patience, args.progress_detection_min_delta, args.visualize)
     num_features_in = data['train'][0].shape[1]
     num_features_out = data['train'][1].shape[1]
     network_options = NetworkOptions(num_features_in, num_features_out, args.size_hidden)

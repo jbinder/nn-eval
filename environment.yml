@@ -11,8 +11,7 @@ dependencies:
   # PyTorch
   - pytorch=0.4.0
   # Keras
-  - tensorflow-gpu
-  - keras
+  - tensorflow-gpu=2.0
   - hdf5
   # scikit-learn
   - scikit-learn=0.21

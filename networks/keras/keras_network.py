@@ -1,11 +1,13 @@
+import datetime
+import os
 from typing import Any
 
-import keras
 import numpy
-from keras import Sequential
-from keras.callbacks import EarlyStopping
-from keras.engine.saving import load_model
-from keras.layers import Dense, K
+import tensorflow
+from tensorflow.keras import Sequential
+from tensorflow.keras.callbacks import EarlyStopping, TensorBoard
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import Dense
 
 import networks
 from common.options import TrainOptions, NetworkOptions
@@ -20,6 +22,7 @@ class KerasNetwork(Network):
     use_deterministic_behavior: bool
     min_delta: float
     default_max_epochs: int
+    visualize: bool
 
     def __init__(self):
         self.use_deterministic_behavior = False
@@ -44,8 +47,9 @@ class KerasNetwork(Network):
                                  activation=train_options.activation_function))
         if train_options.optimizer is not None:
             optimizer = self._get_optimizer(train_options.optimizer, train_options.learning_rate)
-            self.model.compile(loss=train_options.loss_function, optimizer=optimizer, metrics=['accuracy'])
+            self.model.compile(loss=train_options.loss_function, optimizer=optimizer)
         self.data = data
+        self.visualize = train_options.visualize
 
     def train(self) -> TrainOptions:
         x = numpy.array(self.data['train'][0])
@@ -59,13 +63,20 @@ class KerasNetwork(Network):
         early_stopping = EarlyStopping(monitor='loss', min_delta=self.min_delta, patience=patience, verbose=0,
                                        mode='auto', baseline=None, restore_best_weights=True)
         epoch_counter = EpochCountCallback()
-        self.model.fit(x, y, batch_size, max_epochs, callbacks=[early_stopping, epoch_counter])
+        validation_data = None
+        callbacks = [early_stopping, epoch_counter]
+        if self.visualize:
+            log_dir = os.path.join("logs", "fit", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+            callbacks.append(TensorBoard(log_dir=log_dir, histogram_freq=1))
+            x, y = self._get_validation_data()
+            validation_data = (x, y)
+        self.model.fit(x, y, batch_size, max_epochs, validation_data=validation_data, callbacks=callbacks)
+        # noinspection PyProtectedMember
         train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
         return train_options
 
     def validate(self) -> float:
-        x = self.data['valid'][0] if len(self.data['valid'][0]) > 0 else self.data['train'][0]
-        y = self.data['valid'][1] if len(self.data['valid'][1]) > 0 else self.data['train'][1]
+        x, y = self._get_validation_data()
         result = self.model.evaluate(numpy.array(x), numpy.array(y))
         return result[0]
 
@@ -79,14 +90,20 @@ class KerasNetwork(Network):
         self.model = load_model(path)
         return self
 
+    def _get_validation_data(self):
+        x = self.data['valid'][0] if len(self.data['valid'][0]) > 0 else self.data['train'][0]
+        y = self.data['valid'][1] if len(self.data['valid'][1]) > 0 else self.data['train'][1]
+        return x, y
+
     def _set_seed(self, seed):
         seed = 0 if self.use_deterministic_behavior and seed is None else seed
         if seed is not None:
             numpy.random.seed(0)
 
-    def _get_optimizer(self, optimizer_name: str, learning_rate: float):
-        optimizer = getattr(keras.optimizers, optimizer_name)(lr=learning_rate)
+    @staticmethod
+    def _get_optimizer(optimizer_name: str, learning_rate: float):
+        optimizer = getattr(tensorflow.keras.optimizers, optimizer_name)(lr=learning_rate)
         if optimizer_name == "sgd":
             optimizer.nesterov = True
-            optimizer.momentum = K.variable(1, name='momentum')
+            optimizer.momentum = 1
         return optimizer
