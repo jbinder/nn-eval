@@ -74,6 +74,12 @@ Example:
         # Try finding the best options for data in x.csv/y.csv using a hidden layer [8, 8]
         python main.py --x x.csv --y y.csv --size_hidden 8 8
 
+TensorBoard:
+
+Run using:
+
+        tensorboard --logdir logs/fit
+
 
 Development
 -----------

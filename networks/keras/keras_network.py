@@ -68,8 +68,7 @@ class KerasNetwork(Network):
         if self.visualize:
             log_dir = os.path.join("logs", "fit", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
             callbacks.append(TensorBoard(log_dir=log_dir, histogram_freq=1))
-            x, y = self._get_validation_data()
-            validation_data = (x, y)
+            validation_data = self._get_validation_data()
         self.model.fit(x, y, batch_size, max_epochs, validation_data=validation_data, callbacks=callbacks)
         # noinspection PyProtectedMember
         train_options = self.train_options._replace(num_epochs=epoch_counter.get_epic_count())
@@ -78,7 +77,7 @@ class KerasNetwork(Network):
     def validate(self) -> float:
         x, y = self._get_validation_data()
         result = self.model.evaluate(numpy.array(x), numpy.array(y))
-        return result[0]
+        return result
 
     def predict(self, data) -> Any:
         return self.model.predict(numpy.array(data))
